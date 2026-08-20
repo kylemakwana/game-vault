@@ -30,3 +30,6 @@ htmlcov/
 build/
 dist/
 *.egg-info/
+
+# Local Game Vault data
+data/
