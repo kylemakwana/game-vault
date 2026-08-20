@@ -43,16 +43,10 @@ class PlayStationCollector:
             return [self.to_jsonable(item) for item in value]
 
         if isinstance(value, dict):
-            return {
-                key: self.to_jsonable(item)
-                for key, item in value.items()
-            }
+            return {key: self.to_jsonable(item) for key, item in value.items()}
 
         if hasattr(value, "__dict__"):
-            return {
-                key: self.to_jsonable(item)
-                for key, item in vars(value).items()
-            }
+            return {key: self.to_jsonable(item) for key, item in vars(value).items()}
 
         return value
 
@@ -95,25 +89,17 @@ class PlayStationCollector:
         trophy_title,
         force: bool = False,
     ) -> None:
-        output_path = (
-                self.trophy_dir
-                / f"{trophy_title.np_communication_id}.json"
-        )
+        output_path = self.trophy_dir / f"{trophy_title.np_communication_id}.json"
 
         if output_path.exists() and not force:
-            print(
-                f"Skipping {trophy_title.title_name} "
-                "- already cached"
-            )
+            print(f"Skipping {trophy_title.title_name} - already cached")
             return
 
         platform = next(iter(trophy_title.title_platform))
 
         trophies = list(
             self.client.trophies(
-                np_communication_id=(
-                    trophy_title.np_communication_id
-                ),
+                np_communication_id=(trophy_title.np_communication_id),
                 platform=platform,
                 include_progress=True,
                 trophy_group_id="all",
@@ -133,13 +119,10 @@ class PlayStationCollector:
         total = len(trophy_titles)
 
         for index, trophy_title in enumerate(
-                trophy_titles,
-                start=1,
+            trophy_titles,
+            start=1,
         ):
-            print(
-                f"[{index}/{total}] "
-                f"{trophy_title.title_name}"
-            )
+            print(f"[{index}/{total}] {trophy_title.title_name}")
 
             try:
                 self.collect_trophies_for_title(
@@ -147,10 +130,7 @@ class PlayStationCollector:
                     force=force,
                 )
             except Exception as exc:
-                print(
-                    f"Failed to collect "
-                    f"{trophy_title.title_name}: {exc}"
-                )
+                print(f"Failed to collect {trophy_title.title_name}: {exc}")
                 continue
 
             time.sleep(0.5)
