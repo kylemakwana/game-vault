@@ -19,7 +19,6 @@ from game_vault.models.playstation import (
     ValidationResult,
 )
 
-
 NON_GAME_TITLES = {
     "Sky Go",
     "Spotify",
@@ -33,6 +32,7 @@ NON_GAME_TITLES = {
     "Prime Video",
     "Headset Companion",
 }
+
 
 class PlayStationSnapshotBuilder:
     def __init__(self, psnawp: PSNAWP):
@@ -130,9 +130,7 @@ class PlayStationSnapshotBuilder:
                     device_id=device_id,
                     device_name=first.get("deviceName"),
                     device_type=first["deviceType"],
-                    account_device_vector=first.get(
-                        "accountDeviceVector"
-                    ),
+                    account_device_vector=first.get("accountDeviceVector"),
                     activations=activations,
                 )
             )
@@ -156,9 +154,7 @@ class PlayStationSnapshotBuilder:
         titles = []
 
         for title in self.client.title_stats():
-            content_type, classification_source = (
-                self._classify_title(title)
-            )
+            content_type, classification_source = self._classify_title(title)
 
             titles.append(
                 PlayedTitle(
@@ -169,9 +165,7 @@ class PlayStationSnapshotBuilder:
                     content_type=content_type,
                     classification_source=classification_source,
                     play_count=title.play_count,
-                    play_duration_seconds=int(
-                        title.play_duration.total_seconds()
-                    ),
+                    play_duration_seconds=int(title.play_duration.total_seconds()),
                     first_played_at=title.first_played_date_time,
                     last_played_at=title.last_played_date_time,
                 )
@@ -194,10 +188,7 @@ class PlayStationSnapshotBuilder:
                     title_name=psn_title.title_name,
                     title_detail=psn_title.title_detail,
                     title_icon_url=psn_title.title_icon_url,
-                    platforms=[
-                        platform.value
-                        for platform in psn_title.title_platform
-                    ],
+                    platforms=[platform.value for platform in psn_title.title_platform],
                     has_trophy_groups=psn_title.has_trophy_groups,
                     hidden=psn_title.hidden_flag,
                     progress=psn_title.progress,
@@ -207,9 +198,7 @@ class PlayStationSnapshotBuilder:
                     defined_trophies=self._convert_trophy_counts(
                         psn_title.defined_trophies
                     ),
-                    last_updated_at=(
-                        psn_title.last_updated_datetime
-                    ),
+                    last_updated_at=(psn_title.last_updated_datetime),
                     groups=groups,
                 )
             )
@@ -248,10 +237,7 @@ class PlayStationSnapshotBuilder:
         return [
             TrophyGroup(
                 group_id=group_id,
-                trophies=[
-                    self._build_trophy(trophy)
-                    for trophy in group_trophies
-                ],
+                trophies=[self._build_trophy(trophy) for trophy in group_trophies],
             )
             for group_id, group_trophies in grouped.items()
         ]
@@ -277,9 +263,7 @@ class PlayStationSnapshotBuilder:
             icon_url=trophy.trophy_icon_url,
             rarity=rarity,
             earn_rate=earn_rate,
-            progress_target_value=(
-                trophy.trophy_progress_target_value
-            ),
+            progress_target_value=(trophy.trophy_progress_target_value),
             reward_name=trophy.trophy_reward_name,
             reward_image_url=trophy.trophy_reward_img_url,
             user_progress=UserTrophyProgress(
@@ -304,7 +288,6 @@ class PlayStationSnapshotBuilder:
             imported.gold += title.earned_trophies.gold
             imported.platinum += title.earned_trophies.platinum
 
-
         profile = trophy_summary.earned
         is_complete = imported.total == profile.total
         trophy_totals_match: bool = False
@@ -322,14 +305,11 @@ class PlayStationSnapshotBuilder:
         if not trophy_totals_match:
             if not is_complete:
                 warnings.append(
-                    "Trophy import is partial; "
-                    "profile totals cannot yet be "
-                    "validated"
+                    "Trophy import is partial; profile totals cannot yet be validated"
                 )
             else:
                 warnings.append(
-                    "Imported trophy counts do not match "
-                    "PlayStation profile totals."
+                    "Imported trophy counts do not match PlayStation profile totals."
                 )
 
         return ValidationResult(

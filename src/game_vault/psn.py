@@ -8,7 +8,6 @@ from game_vault.services.playstation_snapshot_builder import (
     PlayStationSnapshotBuilder,
 )
 
-
 load_dotenv()
 
 psnawp = PSNAWP(os.environ["PSN_NPSSO"])
