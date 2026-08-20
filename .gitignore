@@ -1,0 +1,32 @@
+# Environment variables / secrets
+.env
+.env.*
+
+# Keep example environment file
+!.env.example
+
+# Virtual environments
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# IDEs
+.idea/
+.vscode/
+
+# macOS
+.DS_Store
+
+# Testing / tooling
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
