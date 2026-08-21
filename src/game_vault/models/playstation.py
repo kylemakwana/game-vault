@@ -127,15 +127,19 @@ class TrophyTitle(BaseModel):
 
 
 class ValidationResult(BaseModel):
-    trophy_import_complete: bool
+    trophy_title_summary_complete: bool
+    trophy_detail_import_complete: bool
 
     expected_trophy_titles_count: int
     imported_trophy_titles_count: int
 
+    expected_trophy_detail_sets_count: int
+    imported_trophy_detail_sets_count: int
+
     profile_trophy_totals: TrophyCounts
     imported_trophy_totals: TrophyCounts
 
-    trophy_totals_match: bool | None
+    trophy_totals_match: bool
 
     warnings: list[str] = Field(default_factory=list)
 

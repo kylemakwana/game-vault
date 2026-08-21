@@ -50,14 +50,15 @@ class PlayStationSnapshotBuilder:
         trophy_titles = self._read_json(self.raw_dir / "trophy_titles.json")
         built_trophy_titles = self._build_trophy_titles(trophy_titles)
         trophy_summary = self._build_trophy_summary(profile)
+        imported_trophy_detail_sets_count = self._count_cached_trophy_titles(
+            trophy_titles
+        )
 
         validation = self._build_validation(
             trophy_summary=trophy_summary,
             trophy_titles=built_trophy_titles,
             expected_trophy_titles_count=len(trophy_titles),
-            imported_trophy_titles_count=self._count_cached_trophy_titles(
-                trophy_titles
-            ),
+            imported_trophy_detail_sets_count=imported_trophy_detail_sets_count,
         )
 
         return PlayStationSnapshot(
@@ -301,53 +302,65 @@ class PlayStationSnapshotBuilder:
         trophy_summary: TrophySummary,
         trophy_titles: list[TrophyTitle],
         expected_trophy_titles_count: int,
-        imported_trophy_titles_count: int,
+        imported_trophy_detail_sets_count: int,
     ) -> ValidationResult:
-        imported = TrophyCounts()
+        profile_totals = trophy_summary.earned
 
-        for title in trophy_titles:
-            imported.bronze += title.earned_trophies.bronze
-            imported.silver += title.earned_trophies.silver
-            imported.gold += title.earned_trophies.gold
-            imported.platinum += title.earned_trophies.platinum
-
-        profile = trophy_summary.earned
-
-        trophy_import_complete = (
-            expected_trophy_titles_count == imported_trophy_titles_count
+        imported_totals = TrophyCounts(
+            bronze=sum(title.earned_trophies.bronze for title in trophy_titles),
+            silver=sum(title.earned_trophies.silver for title in trophy_titles),
+            gold=sum(title.earned_trophies.gold for title in trophy_titles),
+            platinum=sum(title.earned_trophies.platinum for title in trophy_titles),
         )
 
-        trophy_totals_match: bool | None = None
+        imported_trophy_titles_count = len(trophy_titles)
 
-        if trophy_import_complete:
-            trophy_totals_match = (
-                profile.bronze == imported.bronze
-                and profile.silver == imported.silver
-                and profile.gold == imported.gold
-                and profile.platinum == imported.platinum
-            )
+        trophy_title_summary_complete = (
+            imported_trophy_titles_count == expected_trophy_titles_count
+        )
 
-        warnings = []
+        trophy_detail_import_complete = (
+            imported_trophy_detail_sets_count == expected_trophy_titles_count
+        )
 
-        if not trophy_import_complete:
+        trophy_totals_match = (
+            profile_totals.bronze == imported_totals.bronze
+            and profile_totals.silver == imported_totals.silver
+            and profile_totals.gold == imported_totals.gold
+            and profile_totals.platinum == imported_totals.platinum
+        )
+
+        warnings: list[str] = []
+
+        if not trophy_title_summary_complete:
             warnings.append(
-                "Trophy import is partial; "
+                "Trophy title summary import is incomplete; "
                 f"{imported_trophy_titles_count} of "
-                f"{expected_trophy_titles_count} trophy titles "
-                "were successfully imported."
+                f"{expected_trophy_titles_count} titles were imported."
             )
 
-        elif not trophy_totals_match:
+        if not trophy_detail_import_complete:
             warnings.append(
-                "Imported trophy counts do not match PlayStation profile totals."
+                "Detailed trophy import is incomplete; "
+                f"{imported_trophy_detail_sets_count} of "
+                f"{expected_trophy_titles_count} trophy sets were imported."
+            )
+
+        if trophy_title_summary_complete and not trophy_totals_match:
+            warnings.append(
+                "Imported trophy summary totals do not match "
+                "the PlayStation profile totals."
             )
 
         return ValidationResult(
-            trophy_import_complete=trophy_import_complete,
+            trophy_title_summary_complete=trophy_title_summary_complete,
+            trophy_detail_import_complete=trophy_detail_import_complete,
             expected_trophy_titles_count=expected_trophy_titles_count,
             imported_trophy_titles_count=imported_trophy_titles_count,
-            profile_trophy_totals=profile,
-            imported_trophy_totals=imported,
+            expected_trophy_detail_sets_count=expected_trophy_titles_count,
+            imported_trophy_detail_sets_count=imported_trophy_detail_sets_count,
+            profile_trophy_totals=profile_totals,
+            imported_trophy_totals=imported_totals,
             trophy_totals_match=trophy_totals_match,
             warnings=warnings,
         )
