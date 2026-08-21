@@ -1,20 +1,16 @@
-from pathlib import Path
+# src/game_vault/psn.py
+
+import os
 
 from dotenv import load_dotenv
+from psnawp_api import PSNAWP
 
-from game_vault.services.playstation_snapshot_builder import PlayStationSnapshotBuilder
 
-load_dotenv()
+def create_psn_client():
+    load_dotenv()
 
-builder = PlayStationSnapshotBuilder()
-snapshot = builder.build()
+    npsso = os.environ["PSN_NPSSO"]
 
-output_path = Path("data/playstation/snapshot-2.json")
-output_path.parent.mkdir(parents=True, exist_ok=True)
-#
-output_path.write_text(
-    snapshot.model_dump_json(indent=4),
-    encoding="utf-8",
-)
+    psnawp = PSNAWP(npsso)
 
-print(f"Snapshot written to {output_path}")
+    return psnawp.me()
