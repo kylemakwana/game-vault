@@ -98,6 +98,7 @@ def build_playstation_snapshot() -> None:
 
     print(f"Snapshot written to {output_path}")
 
+
 def validate_playstation_snapshot() -> None:
     from game_vault.services.playstation_snapshot_builder import (
         PlayStationSnapshotBuilder,
@@ -107,8 +108,13 @@ def validate_playstation_snapshot() -> None:
     validation = builder.validate()
 
     print(
-        f"Trophy titles imported: {validation.imported_trophy_titles_count}/{validation.expected_trophy_titles_count}\n"
-        f"Trophy details imported: {validation.imported_trophy_detail_sets_count}/{validation.expected_trophy_detail_sets_count}\n"
-        f"Trophy totals match? {validation.trophy_totals_match}\n"
-        f"Warnings: {validation.warnings}",
+        f"Trophy titles imported: {validation.imported_trophy_titles_count}/"
+        f"{validation.expected_trophy_titles_count}"
     )
+    print(
+        f"Trophy details imported: "
+        f"{validation.imported_trophy_detail_sets_count}/"
+        f"{validation.expected_trophy_detail_sets_count}"
+    )
+    print(f"Trophy totals match? {validation.trophy_totals_match}")
+    print(f"Warnings: {validation.warnings}")

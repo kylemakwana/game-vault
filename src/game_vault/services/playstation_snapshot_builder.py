@@ -89,7 +89,6 @@ class PlayStationSnapshotBuilder:
             imported_trophy_detail_sets_count=imported_trophy_detail_sets_count,
         )
 
-
     @staticmethod
     def _build_account(legacy_profile: dict) -> PlayStationAccount:
         profile = legacy_profile["profile"]

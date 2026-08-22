@@ -1,0 +1,16 @@
+from pydantic import BaseModel
+
+
+class PlayActivity(BaseModel):
+    id: str
+
+    account_id: str
+    game_release_id: str
+
+    playtime_seconds: int | None = None
+    play_count: int | None = None
+
+    first_played_at: str | None = None
+    last_played_at: str | None = None
+
+    source: str
