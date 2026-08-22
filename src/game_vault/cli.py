@@ -59,8 +59,8 @@ def handle_psn_command(command: str) -> None:
         collect_playstation_data()
         build_playstation_snapshot()
 
-    # elif command == "validate":
-    #     validate_playstation_snapshot()
+    elif command == "validate":
+        validate_playstation_snapshot()
 
 
 def collect_playstation_data() -> None:
@@ -83,10 +83,8 @@ def build_playstation_snapshot() -> None:
     )
 
     builder = PlayStationSnapshotBuilder()
-
     snapshot = builder.build()
-
-    output_path = Path("data/playstation/snapshot-3.json")
+    output_path = Path("data/playstation/snapshot.json")
 
     output_path.parent.mkdir(
         parents=True,
@@ -99,3 +97,18 @@ def build_playstation_snapshot() -> None:
     )
 
     print(f"Snapshot written to {output_path}")
+
+def validate_playstation_snapshot() -> None:
+    from game_vault.services.playstation_snapshot_builder import (
+        PlayStationSnapshotBuilder,
+    )
+
+    builder = PlayStationSnapshotBuilder()
+    validation = builder.validate()
+
+    print(
+        f"Trophy titles imported: {validation.imported_trophy_titles_count}/{validation.expected_trophy_titles_count}\n"
+        f"Trophy details imported: {validation.imported_trophy_detail_sets_count}/{validation.expected_trophy_detail_sets_count}\n"
+        f"Trophy totals match? {validation.trophy_totals_match}\n"
+        f"Warnings: {validation.warnings}",
+    )

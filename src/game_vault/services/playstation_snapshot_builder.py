@@ -73,6 +73,23 @@ class PlayStationSnapshotBuilder:
             validation=validation,
         )
 
+    def validate(self) -> ValidationResult:
+        profile = self._read_json(self.raw_dir / "profile.json")
+        trophy_summary = self._build_trophy_summary(profile)
+        trophy_titles = self._read_json(self.raw_dir / "trophy_titles.json")
+        built_trophy_titles = self._build_trophy_titles(trophy_titles)
+        imported_trophy_detail_sets_count = self._count_cached_trophy_titles(
+            trophy_titles
+        )
+
+        return self._build_validation(
+            trophy_summary=trophy_summary,
+            trophy_titles=built_trophy_titles,
+            expected_trophy_titles_count=len(trophy_titles),
+            imported_trophy_detail_sets_count=imported_trophy_detail_sets_count,
+        )
+
+
     @staticmethod
     def _build_account(legacy_profile: dict) -> PlayStationAccount:
         profile = legacy_profile["profile"]
