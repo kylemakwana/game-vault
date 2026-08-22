@@ -42,6 +42,11 @@ def main() -> None:
         help="Validate the cached PlayStation snapshot",
     )
 
+    psn_subparsers.add_parser(
+        "map",
+        help="Map the cached PlayStation snapshot to Game Vault format",
+    )
+
     args = parser.parse_args()
 
     if args.platform == "psn":
@@ -61,6 +66,9 @@ def handle_psn_command(command: str) -> None:
 
     elif command == "validate":
         validate_playstation_snapshot()
+
+    elif command == "map":
+        map_playstation_snapshot()
 
 
 def collect_playstation_data() -> None:
@@ -118,3 +126,12 @@ def validate_playstation_snapshot() -> None:
     )
     print(f"Trophy totals match? {validation.trophy_totals_match}")
     print(f"Warnings: {validation.warnings}")
+
+
+def map_playstation_snapshot() -> None:
+    from game_vault.mappers.playstation_mapper import (
+        PlaystationMapper,
+    )
+
+    mapper = PlaystationMapper()
+    mapper.map()
