@@ -95,13 +95,13 @@ class Trophy(BaseModel):
     user_progress: UserTrophyProgress
 
 
-class TrophyGroup(BaseModel):
+class PlaystationTrophyGroup(BaseModel):
     group_id: str
     name: str | None = None
     trophies: list[Trophy] = Field(default_factory=list)
 
 
-class TrophyTitle(BaseModel):
+class PlaystationTrophyTitle(BaseModel):
     np_communication_id: str
     np_service_name: str
     np_title_id: str | None = None
@@ -123,7 +123,7 @@ class TrophyTitle(BaseModel):
 
     last_updated_at: datetime | None = None
 
-    groups: list[TrophyGroup] = Field(default_factory=list)
+    groups: list[PlaystationTrophyGroup] = Field(default_factory=list)
 
 
 class ValidationResult(BaseModel):
@@ -152,6 +152,6 @@ class PlayStationSnapshot(BaseModel):
 
     devices: list[PlayStationDevice]
     played_titles: list[PlayedTitle]
-    trophy_titles: list[TrophyTitle]
+    trophy_titles: list[PlaystationTrophyTitle]
 
     validation: ValidationResult

@@ -9,12 +9,12 @@ from game_vault.models.playstation import (
     PlayStationAccount,
     PlayStationDevice,
     PlayStationSnapshot,
+    PlaystationTrophyGroup,
+    PlaystationTrophyTitle,
     SnapshotMetadata,
     Trophy,
     TrophyCounts,
-    TrophyGroup,
     TrophySummary,
-    TrophyTitle,
     UserTrophyProgress,
     ValidationResult,
 )
@@ -202,7 +202,9 @@ class PlayStationSnapshotBuilder:
 
         return titles
 
-    def _build_trophy_titles(self, trophy_titles: list[dict]) -> list[TrophyTitle]:
+    def _build_trophy_titles(
+        self, trophy_titles: list[dict]
+    ) -> list[PlaystationTrophyTitle]:
         result = []
 
         for title in trophy_titles:
@@ -218,7 +220,7 @@ class PlayStationSnapshotBuilder:
             groups = self._build_trophy_groups(trophies)
 
             result.append(
-                TrophyTitle(
+                PlaystationTrophyTitle(
                     np_communication_id=communication_id,
                     np_service_name=title["np_service_name"],
                     np_title_id=title["np_title_id"],
@@ -255,14 +257,14 @@ class PlayStationSnapshotBuilder:
     def _build_trophy_groups(
         self,
         trophies: list[dict],
-    ) -> list[TrophyGroup]:
+    ) -> list[PlaystationTrophyGroup]:
         grouped: dict[str, list[dict]] = defaultdict(list)
 
         for trophy in trophies:
             grouped[trophy["trophy_group_id"]].append(trophy)
 
         return [
-            TrophyGroup(
+            PlaystationTrophyGroup(
                 group_id=group_id,
                 trophies=[self._build_trophy(trophy) for trophy in group_trophies],
             )
@@ -316,7 +318,7 @@ class PlayStationSnapshotBuilder:
     @staticmethod
     def _build_validation(
         trophy_summary: TrophySummary,
-        trophy_titles: list[TrophyTitle],
+        trophy_titles: list[PlaystationTrophyTitle],
         expected_trophy_titles_count: int,
         imported_trophy_detail_sets_count: int,
     ) -> ValidationResult:

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel
 
 
@@ -10,7 +12,7 @@ class PlayActivity(BaseModel):
     playtime_seconds: int | None = None
     play_count: int | None = None
 
-    first_played_at: str | None = None
-    last_played_at: str | None = None
+    first_played_at: datetime | None = None
+    last_played_at: datetime | None = None
 
     source: str
