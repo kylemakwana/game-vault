@@ -180,7 +180,7 @@ class PlaystationMapper:
                     achievement_type=trophy.type,
                     rarity=trophy.rarity,
                     global_unlock_percentage=trophy.earn_rate,
-                    progress_target=trophy.progress_target,
+                    progress_target=trophy.progress_target_value,
                 )
 
                 achievements.append(achievement)
@@ -194,7 +194,7 @@ class PlaystationMapper:
                     unlocked_at=user_progress.earned_at,
                     progress=user_progress.progress,
                     progress_percentage=user_progress.progress_rate,
-                    progresssed_at=user_progress.progress_at,
+                    progresssed_at=user_progress.progressed_at,
                 )
 
                 progress_records.append(progress)

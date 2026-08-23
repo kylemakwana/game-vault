@@ -1,4 +1,8 @@
 import argparse
+from pathlib import Path
+from pprint import pprint
+
+from game_vault.loaders.catalog_loader import load_mappings, load_releases
 
 
 def main() -> None:
@@ -132,6 +136,18 @@ def map_playstation_snapshot() -> None:
     from game_vault.mappers.playstation_mapper import (
         PlaystationMapper,
     )
+    from game_vault.services.playstation_snapshot_builder import (
+        PlayStationSnapshotBuilder,
+    )
 
-    mapper = PlaystationMapper()
-    mapper.map()
+    mappings = load_mappings(Path("data/mappings/playstation.json"))
+
+    releases = load_releases(Path("data/catalog/releases.json"))
+
+    builder = PlayStationSnapshotBuilder()
+    snapshot = builder.build()
+
+    mapper = PlaystationMapper(snapshot, mappings, releases)
+
+    mapped_data = mapper.map()
+    pprint(mapped_data)
