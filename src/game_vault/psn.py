@@ -1,7 +1,6 @@
 # src/game_vault/psn.py
 
-import os
-
+from config import PSN_NPSSO
 from dotenv import load_dotenv
 from psnawp_api import PSNAWP
 
@@ -9,8 +8,6 @@ from psnawp_api import PSNAWP
 def create_psn_client():
     load_dotenv()
 
-    npsso = os.environ["PSN_NPSSO"]
-
-    psnawp = PSNAWP(npsso)
+    psnawp = PSNAWP(PSN_NPSSO)
 
     return psnawp.me()

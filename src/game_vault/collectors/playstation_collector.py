@@ -8,9 +8,13 @@ from psnawp_api.models.client import Client
 
 
 class PlayStationCollector:
-    def __init__(self, client: Client):
+    def __init__(
+        self,
+        client: Client,
+        raw_dir: Path = Path("data/playstation/raw"),
+    ) -> None:
         self.client = client
-        self.raw_dir = Path("data/playstation/raw")
+        self.raw_dir = raw_dir
         self.trophy_dir = self.raw_dir / "trophies"
 
         self.raw_dir.mkdir(parents=True, exist_ok=True)
@@ -99,7 +103,7 @@ class PlayStationCollector:
 
         trophies = list(
             self.client.trophies(
-                np_communication_id=(trophy_title.np_communication_id),
+                np_communication_id=trophy_title.np_communication_id,
                 platform=platform,
                 include_progress=True,
                 trophy_group_id="all",
