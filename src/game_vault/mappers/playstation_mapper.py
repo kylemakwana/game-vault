@@ -8,18 +8,23 @@ from game_vault.models.achievement import (
 )
 from game_vault.models.activity import PlayActivity
 from game_vault.models.game import (
+    Game,
     GameRelease,
 )
 from game_vault.models.mapping import SourceGameMapping
 from game_vault.models.platform import PlatformAccount
 from game_vault.models.playstation import PlayStationSnapshot
+from game_vault.models.series import GameSeries, GameSeriesMembership
 
 
 @dataclass
 class PlaystationMappedData:
-    account: PlatformAccount | None = None
-
+    games: list[Game]
     releases: list[GameRelease] = field(default_factory=list)
+
+    series: list[GameSeries] = field(default_factory=list)
+    series_membership: list[GameSeriesMembership] = field(default_factory=list)
+
     activities: list[PlayActivity] = field(default_factory=list)
 
     achievement_sets: list[AchievementSet] = field(default_factory=list)
@@ -28,6 +33,7 @@ class PlaystationMappedData:
     achievement_progress: list[AchievementProgress] = field(default_factory=list)
 
     mappings: list[SourceGameMapping] = field(default_factory=list)
+    account: PlatformAccount | None = None
 
 
 class PlaystationMapper:
@@ -38,12 +44,18 @@ class PlaystationMapper:
         snapshot: PlayStationSnapshot,
         mappings: list[SourceGameMapping],
         releases: list[GameRelease],
+        games: list[Game],
+        series: list[GameSeries],
+        series_memberships: list[GameSeriesMembership],
     ):
         self.snapshot = snapshot
         self.mappings = mappings
         self.releases: dict[str, GameRelease] = {
             release.id: release for release in releases
         }
+        self.games: dict[str, Game] = {game.id: game for game in games}
+        self.series: dict[str, GameSeries] = {serie.id: serie for serie in series}
+        self.series_memberships = series_memberships
 
     def _find_release_mapping(
         self,
@@ -66,6 +78,35 @@ class PlaystationMapper:
             release
             for release_id, release in self.releases.items()
             if release_id in release_ids
+        ]
+
+    def _mapped_games(self) -> list[Game]:
+        game_ids = {release.game_id for release in self._mapped_releases()}
+
+        return [game for game_id, game in self.games.items() if game_id in game_ids]
+
+    def _mapped_series_memberships(
+        self,
+        games: list[Game],
+    ) -> list[GameSeriesMembership]:
+        game_ids = {game.id for game in games}
+
+        return [
+            membership
+            for membership in self.series_memberships
+            if membership.game_id in game_ids
+        ]
+
+    def _mapped_series(
+        self,
+        memberships: list[GameSeriesMembership],
+    ) -> list[GameSeries]:
+        series_ids = {membership.series_id for membership in memberships}
+
+        return [
+            series
+            for series_id, series in self.series.items()
+            if series_id in series_ids
         ]
 
     def _map_account(self) -> PlatformAccount:
@@ -251,6 +292,10 @@ class PlaystationMapper:
         account = self._map_account()
 
         releases = self._mapped_releases()
+        games = self._mapped_games()
+        series_memberships = self._mapped_series_memberships(games)
+        series = self._mapped_series(series_memberships)
+
         activities = self._map_played_titles(account)
 
         (achievement_sets, achievement_groups, achievements, achievement_progress) = (
@@ -259,7 +304,10 @@ class PlaystationMapper:
 
         return PlaystationMappedData(
             account=account,
+            games=games,
             releases=releases,
+            series=series,
+            series_membership=series_memberships,
             activities=activities,
             achievement_sets=achievement_sets,
             achievement_groups=achievement_groups,

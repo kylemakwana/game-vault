@@ -2,7 +2,12 @@ import argparse
 from pathlib import Path
 from pprint import pprint
 
-from game_vault.loaders.catalog_loader import load_mappings, load_releases
+from game_vault.loaders.catalog_loader import (
+    load_mappings,
+    load_releases,
+    load_series,
+    load_series_memberships,
+)
 
 
 def main() -> None:
@@ -141,13 +146,22 @@ def map_playstation_snapshot() -> None:
     )
 
     mappings = load_mappings(Path("data/mappings/playstation.json"))
-
     releases = load_releases(Path("data/catalog/releases.json"))
+    series = load_series(Path("data/catalog/series.json"))
+    series_memberships = load_series_memberships(
+        Path("data/catalog/series_memberships.json")
+    )
 
     builder = PlayStationSnapshotBuilder()
     snapshot = builder.build()
 
-    mapper = PlaystationMapper(snapshot, mappings, releases)
+    mapper = PlaystationMapper(
+        snapshot=snapshot,
+        mappings=mappings,
+        releases=releases,
+        series=series,
+        series_memberships=series_memberships,
+    )
 
     mapped_data = mapper.map()
     pprint(mapped_data)
