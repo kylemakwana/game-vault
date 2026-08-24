@@ -59,6 +59,15 @@ class PlaystationMapper:
             None,
         )
 
+    def _mapped_releases(self) -> list[GameRelease]:
+        release_ids = {mapping.game_release_id for mapping in self.mappings}
+
+        return [
+            release
+            for release_id, release in self.releases.items()
+            if release_id in release_ids
+        ]
+
     def _map_account(self) -> PlatformAccount:
         account = self.snapshot.account
 
@@ -73,8 +82,7 @@ class PlaystationMapper:
     def _map_played_titles(
         self,
         account: PlatformAccount,
-    ) -> tuple[list[GameRelease], list[PlayActivity]]:
-        releases: list[GameRelease] = []
+    ) -> list[PlayActivity]:
         activities: list[PlayActivity] = []
 
         for title in self.snapshot.played_titles:
@@ -94,20 +102,19 @@ class PlaystationMapper:
             if release is None:
                 continue
 
-            activity = PlayActivity(
-                id=f"psn-activity:{title.title_id}",
-                account_id=account.id,
-                game_release_id=release.id,
-                playtime_seconds=title.play_duration_seconds,
-                first_played_at=title.first_played_at,
-                last_played_at=title.last_played_at,
-                source=self.SERVICE_ID,
+            activities.append(
+                PlayActivity(
+                    id=f"psn-activity:{title.title_id}",
+                    account_id=account.id,
+                    game_release_id=release.id,
+                    playtime_seconds=title.play_duration_seconds,
+                    first_played_at=title.first_played_at,
+                    last_played_at=title.last_played_at,
+                    source=self.SERVICE_ID,
+                )
             )
 
-            releases.append(release)
-            activities.append(activity)
-
-        return releases, activities
+        return activities
 
     @staticmethod
     def _platform_from_category(category: str) -> str:
@@ -243,7 +250,8 @@ class PlaystationMapper:
     def map(self) -> PlaystationMappedData:
         account = self._map_account()
 
-        releases, activities = self._map_played_titles(account)
+        releases = self._mapped_releases()
+        activities = self._map_played_titles(account)
 
         (achievement_sets, achievement_groups, achievements, achievement_progress) = (
             self._map_trophy_titles(account)
