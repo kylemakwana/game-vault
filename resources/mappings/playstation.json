@@ -1,0 +1,58 @@
+[
+  {
+    "source": "playstation_trophy_set",
+    "source_id": "NPWR05636_00",
+    "game_release_id": "minecraft-ps3",
+    "match_method": "manual",
+    "confidence": 1.0
+  },
+  {
+    "source": "playstation_title",
+    "source_id": "CUSA00265_00",
+    "game_release_id": "minecraft-ps4",
+    "match_method": "manual",
+    "confidence": 1.0
+  },
+  {
+    "source": "playstation_trophy_set",
+    "source_id": "NPWR20567_00",
+    "game_release_id": "minecraft-ps4",
+    "match_method": "manual",
+    "confidence": 1.0
+  },
+  {
+    "source": "playstation_trophy_set",
+    "source_id": "NPWR05706_00",
+    "game_release_id": "minecraft-ps4",
+    "match_method": "manual",
+    "confidence": 1.0
+  },
+  {
+    "source": "playstation_title",
+    "source_id": "PPSA17221_00",
+    "game_release_id": "minecraft-ps5",
+    "match_method": "manual",
+    "confidence": 1.0
+  },
+  {
+    "source": "playstation_trophy_set",
+    "source_id": "NPWR41319_00",
+    "game_release_id": "minecraft-ps5",
+    "match_method": "manual",
+    "confidence": 1.0
+  },
+  {
+    "source": "playstation_title",
+    "source_id": "CUSA18797_00",
+    "game_release_id": "minecraft-dungeons-ps4",
+    "match_method": "manual",
+    "confidence": 1.0
+  },
+  {
+    "source": "playstation_trophy_set",
+    "source_id": "NPWR20066_00",
+    "game_release_id": "minecraft-dungeons-ps4",
+    "match_method": "manual",
+    "confidence": 1.0
+  }
+]

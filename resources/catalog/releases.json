@@ -1,0 +1,26 @@
+[
+  {
+    "id": "minecraft-ps3",
+    "game_id": "minecraft",
+    "platform_id": "ps3",
+    "name": "Minecraft: PlayStation®3 Edition"
+  },
+  {
+    "id": "minecraft-ps4",
+    "game_id": "minecraft",
+    "platform_id": "ps4",
+    "name": "Minecraft: PlayStation®4 Edition"
+  },
+  {
+    "id": "minecraft-ps5",
+    "game_id": "minecraft",
+    "platform_id": "ps5",
+    "name": "Minecraft: PlayStation®5 Edition"
+  },
+  {
+    "id": "minecraft-dungeons-ps4",
+    "game_id": "minecraft-dungeons",
+    "platform_id": "ps4",
+    "name": "Minecraft Dungeons"
+  }
+]

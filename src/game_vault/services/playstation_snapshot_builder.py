@@ -33,6 +33,13 @@ NON_GAME_TITLES = {
     "Headset Companion",
 }
 
+TROPHY_RARITY_MAP = {
+    0: "ultra_rare",
+    1: "very_rare",
+    2: "rare",
+    3: "common",
+}
+
 
 class PlayStationSnapshotBuilder:
     def __init__(self, raw_dir: Path = Path("data/playstation/raw")):
@@ -273,35 +280,33 @@ class PlayStationSnapshotBuilder:
 
     @staticmethod
     def _build_trophy(trophy: dict) -> Trophy:
-        rarity = None
+        earn_rate: str | None = trophy.get("trophy_earn_rate")
 
-        if trophy["trophy_rarity"] is not None:
-            rarity = trophy["trophy_type"].lower()
+        rarity_value: int | None = trophy.get("trophy_rarity")
 
-        earn_rate = None
-
-        if trophy["trophy_earn_rate"] is not None:
-            earn_rate = float(trophy["trophy_earn_rate"])
+        rarity = (
+            TROPHY_RARITY_MAP.get(rarity_value) if rarity_value is not None else None
+        )
 
         return Trophy(
             trophy_id=trophy["trophy_id"],
             trophy_set_version=trophy["trophy_set_version"],
             name=trophy["trophy_name"],
-            detail=trophy["trophy_detail"],
-            type=trophy["trophy_type"].lower(),
+            detail=trophy.get("trophy_detail"),
+            type=trophy["trophy_type"],
             hidden=trophy["trophy_hidden"],
-            icon_url=trophy["trophy_icon_url"],
+            icon_url=trophy.get("trophy_icon_url"),
             rarity=rarity,
-            earn_rate=earn_rate,
-            progress_target_value=trophy["trophy_progress_target_value"],
-            reward_name=trophy["trophy_reward_name"],
-            reward_image_url=trophy["trophy_reward_img_url"],
+            earn_rate=float(earn_rate) if earn_rate is not None else None,
+            progress_target_value=trophy.get("trophy_progress_target_value"),
+            reward_name=trophy.get("trophy_reward_name"),
+            reward_image_url=trophy.get("trophy_reward_img_url"),
             user_progress=UserTrophyProgress(
                 earned=trophy["earned"],
-                earned_at=trophy["earned_date_time"],
-                progress=trophy["progress"],
-                progress_rate=trophy["progress_rate"],
-                progressed_at=trophy["progressed_date_time"],
+                earned_at=trophy.get("earned_date_time"),
+                progress=trophy.get("progress"),
+                progress_rate=trophy.get("progress_rate"),
+                progressed_at=trophy.get("progressed_date_time"),
             ),
         )
 

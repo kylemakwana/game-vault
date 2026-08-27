@@ -3,6 +3,7 @@ from pathlib import Path
 from pprint import pprint
 
 from game_vault.loaders.catalog_loader import (
+    load_games,
     load_mappings,
     load_releases,
     load_series,
@@ -145,11 +146,12 @@ def map_playstation_snapshot() -> None:
         PlayStationSnapshotBuilder,
     )
 
-    mappings = load_mappings(Path("data/mappings/playstation.json"))
-    releases = load_releases(Path("data/catalog/releases.json"))
-    series = load_series(Path("data/catalog/series.json"))
+    mappings = load_mappings(Path("resources/mappings/playstation.json"))
+    games = load_games(Path("resources/catalog/games.json"))
+    releases = load_releases(Path("resources/catalog/releases.json"))
+    series = load_series(Path("resources/catalog/series.json"))
     series_memberships = load_series_memberships(
-        Path("data/catalog/series_memberships.json")
+        Path("resources/catalog/series_memberships.json")
     )
 
     builder = PlayStationSnapshotBuilder()
@@ -158,6 +160,7 @@ def map_playstation_snapshot() -> None:
     mapper = PlaystationMapper(
         snapshot=snapshot,
         mappings=mappings,
+        games=games,
         releases=releases,
         series=series,
         series_memberships=series_memberships,

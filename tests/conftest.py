@@ -1,3 +1,4 @@
+from types import SimpleNamespace
 from unittest.mock import Mock
 
 import pytest
@@ -144,4 +145,61 @@ def trophy_titles() -> list[dict]:
             "last_updated_datetime": "2026-06-18T20:43:21+00:00",
             "np_title_id": None,
         }
+    ]
+
+
+@pytest.fixture
+def trophy_title():
+    return SimpleNamespace(
+        np_communication_id="TEST12345_00",
+        title_name="Test Game",
+        title_platform={"PS5"},
+    )
+
+
+@pytest.fixture
+def collected_trophies() -> list[dict]:
+    return [
+        {
+            "trophy_set_version": "01.00",
+            "has_trophy_groups": False,
+            "trophy_id": 0,
+            "trophy_hidden": False,
+            "trophy_type": "bronze",
+            "trophy_name": "Test Trophy 1",
+            "trophy_detail": "This is a test trophy",
+            "trophy_icon_url": "https://test-url.com/trophy/np/TEST12345_00_00F640216909F8C8C95B79AECEB84B54D4B2F05064/A6F1D13F9CC614F65BEE217DF5D59E1FA3E46BB8.PNG",
+            "trophy_group_id": "default",
+            "trophy_progress_target_value": None,
+            "trophy_reward_name": None,
+            "trophy_reward_img_url": None,
+            "earned": False,
+            "progress": None,
+            "progress_rate": None,
+            "progressed_date_time": None,
+            "earned_date_time": None,
+            "trophy_rarity": 3,
+            "trophy_earn_rate": "77.6",
+        },
+        {
+            "trophy_set_version": "01.00",
+            "has_trophy_groups": False,
+            "trophy_id": 1,
+            "trophy_hidden": True,
+            "trophy_type": "Gold",
+            "trophy_name": "Test Trophy 2",
+            "trophy_detail": "This is another test trophy",
+            "trophy_icon_url": "https://test-url.com/trophy/np/TEST12345_00_00F640216909F8C8C95B79AECEB84B54D4B2F05064/53AF6565925073849CB8C80B25323CC7E8063592.PNG",
+            "trophy_group_id": "default",
+            "trophy_progress_target_value": None,
+            "trophy_reward_name": None,
+            "trophy_reward_img_url": None,
+            "earned": True,
+            "progress": None,
+            "progress_rate": None,
+            "progressed_date_time": None,
+            "earned_date_time": "2018-10-06T21:21:18+00:00",
+            "trophy_rarity": 2,
+            "trophy_earn_rate": "56.4",
+        },
     ]

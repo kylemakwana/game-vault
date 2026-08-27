@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class Achievement(BaseModel):
@@ -31,14 +31,13 @@ class AchievementSet(BaseModel):
     service_id: str
     name: str | None = None
     external_identifier: str | None = None
-    groups: list[AchievementGroup] = Field(default_factory=list)
 
 
 class AchievementProgress(BaseModel):
-    achievemnt_id: str
+    achievement_id: str
     account_id: str
     unlocked: bool
     unlocked_at: datetime | None = None
     progress: int | None = None
     progress_percentage: int | None = None
-    progresssed_at: datetime | None = None
+    progressed_at: datetime | None = None

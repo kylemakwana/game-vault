@@ -1,0 +1,14 @@
+[
+  {
+    "game_id": "minecraft",
+    "series_id": "minecraft",
+    "role": "mainline",
+    "sequence_number": 1
+  },
+  {
+    "game_id": "minecraft-dungeons",
+    "series_id": "minecraft",
+    "role": "spin_off",
+    "sequence_number": null
+  }
+]

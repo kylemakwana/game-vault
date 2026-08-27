@@ -33,4 +33,4 @@ class GameRelease(BaseModel):
 
     image_url: str | None = None
 
-    external_idenifiers: list[ExternalIdentifier] = Field(default_factory=list)
+    external_identifiers: list[ExternalIdentifier] = Field(default_factory=list)

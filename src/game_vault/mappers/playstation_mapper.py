@@ -149,6 +149,7 @@ class PlaystationMapper:
                     account_id=account.id,
                     game_release_id=release.id,
                     playtime_seconds=title.play_duration_seconds,
+                    play_count=title.play_count,
                     first_played_at=title.first_played_at,
                     last_played_at=title.last_played_at,
                     source=self.SERVICE_ID,
@@ -236,13 +237,13 @@ class PlaystationMapper:
                 user_progress = trophy.user_progress
 
                 progress = AchievementProgress(
-                    achievemnt_id=achievement_id,
+                    achievement_id=achievement_id,
                     account_id=account.id,
                     unlocked=user_progress.earned,
                     unlocked_at=user_progress.earned_at,
                     progress=user_progress.progress,
                     progress_percentage=user_progress.progress_rate,
-                    progresssed_at=user_progress.progressed_at,
+                    progressed_at=user_progress.progressed_at,
                 )
 
                 progress_records.append(progress)
