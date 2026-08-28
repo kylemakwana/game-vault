@@ -2,13 +2,10 @@ import argparse
 from pathlib import Path
 from pprint import pprint
 
-from game_vault.loaders.catalog_loader import (
-    load_games,
-    load_mappings,
-    load_releases,
-    load_series,
-    load_series_memberships,
-)
+from game_vault.loaders.catalog_loader import load_catalog
+from game_vault.models.game import Game, GameRelease
+from game_vault.models.mapping import SourceGameMapping
+from game_vault.models.series import GameSeries, GameSeriesMembership
 
 
 def main() -> None:
@@ -146,12 +143,14 @@ def map_playstation_snapshot() -> None:
         PlayStationSnapshotBuilder,
     )
 
-    mappings = load_mappings(Path("resources/mappings/playstation.json"))
-    games = load_games(Path("resources/catalog/games.json"))
-    releases = load_releases(Path("resources/catalog/releases.json"))
-    series = load_series(Path("resources/catalog/series.json"))
-    series_memberships = load_series_memberships(
-        Path("resources/catalog/series_memberships.json")
+    mappings = load_catalog(
+        Path("resources/mappings/playstation.json"), SourceGameMapping
+    )
+    games = load_catalog(Path("resources/catalog/games.json"), Game)
+    releases = load_catalog(Path("resources/catalog/releases.json"), GameRelease)
+    series = load_catalog(Path("resources/catalog/series.json"), GameSeries)
+    series_memberships = load_catalog(
+        Path("resources/catalog/series_memberships.json"), GameSeriesMembership
     )
 
     builder = PlayStationSnapshotBuilder()
