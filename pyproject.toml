@@ -5,10 +5,8 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
-    "pre-commit>=4.6.2",
     "psnawp>=3.0.3",
     "pydantic>=2.13.4",
-    "pytest>=9.1.1",
     "python-dotenv>=1.2.3",
 ]
 
@@ -21,6 +19,8 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "pre-commit>=4.6.2",
+    "pytest>=9.1.1",
     "ruff>=0.16.4",
 ]
 
