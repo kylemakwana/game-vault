@@ -76,7 +76,7 @@ class PlayStationSnapshotBuilder:
             trophy_summary=trophy_summary,
             devices=self._build_devices(devices),
             played_titles=self._build_played_titles(played_titles),
-            trophy_titles=self._build_trophy_titles(trophy_titles),
+            trophy_titles=built_trophy_titles,
             validation=validation,
         )
 
