@@ -236,8 +236,8 @@ class PlayStationSnapshotBuilder:
                     title_detail=title["title_detail"],
                     title_icon_url=title["title_icon_url"],
                     platforms=[platform for platform in title["title_platform"]],
-                    has_trophy_groups=title["has_trophy_groups"],
-                    hidden=title["hidden_flag"],
+                    has_trophy_groups=bool(title.get("has_trophy_groups")),
+                    hidden=bool(title.get("hidden_flag")),
                     progress=title["progress"],
                     earned_trophies=self._convert_trophy_counts(
                         title["earned_trophies"]

@@ -14,25 +14,25 @@ import pytest
     [
         (
             "get_profile_legacy",
-            "legacy_profile",
+            "mock_profile",
             "collect_profile",
             "profile.json",
         ),
         (
             "get_account_devices",
-            "devices",
+            "mock_devices",
             "collect_devices",
             "devices.json",
         ),
         (
             "title_stats",
-            "played_titles",
+            "mock_played_titles",
             "collect_played_titles",
             "played_titles.json",
         ),
         (
             "trophy_titles",
-            "trophy_titles",
+            "mock_trophy_titles",
             "collect_trophy_titles",
             "trophy_titles.json",
         ),
@@ -40,7 +40,7 @@ import pytest
 )
 def test_collector_writes_responses_to_json(
     request,
-    playstation_collector,
+    mock_playstation_collector,
     mock_psn_client,
     tmp_path,
     client_method,
@@ -53,7 +53,7 @@ def test_collector_writes_responses_to_json(
     mocked_method = getattr(mock_psn_client, client_method)
     mocked_method.return_value = expected_data
 
-    method_under_test = getattr(playstation_collector, collector_method)
+    method_under_test = getattr(mock_playstation_collector, collector_method)
     method_under_test()
 
     output_file = tmp_path / output_filename
@@ -69,17 +69,18 @@ def test_collector_writes_responses_to_json(
 
 
 def test_collect_trophies_for_title(
-    playstation_collector,
+    mock_playstation_collector,
     mock_psn_client,
-    trophy_title,
-    collected_trophies,
+    mock_trophy_title,
+    mock_collected_trophies,
 ):
-    mock_psn_client.trophies.return_value = collected_trophies
+    mock_psn_client.trophies.return_value = mock_collected_trophies
 
-    playstation_collector.collect_trophies_for_title(trophy_title)
+    mock_playstation_collector.collect_trophies_for_title(mock_trophy_title)
 
     output_file = (
-        playstation_collector.trophy_dir / f"{trophy_title.np_communication_id}.json"
+        mock_playstation_collector.trophy_dir
+        / f"{mock_trophy_title.np_communication_id}.json"
     )
 
     assert output_file.exists()
@@ -87,7 +88,7 @@ def test_collect_trophies_for_title(
     with output_file.open() as file:
         result = json.load(file)
 
-    assert result == collected_trophies
+    assert result == mock_collected_trophies
 
     mock_psn_client.trophies.assert_called_once_with(
         np_communication_id="TEST12345_00",
@@ -98,18 +99,19 @@ def test_collect_trophies_for_title(
 
 
 def test_collect_trophies_for_title_skips_cached_file(
-    playstation_collector,
+    mock_playstation_collector,
     mock_psn_client,
-    trophy_title,
+    mock_trophy_title,
 ):
     output_file = (
-        playstation_collector.trophy_dir / f"{trophy_title.np_communication_id}.json"
+        mock_playstation_collector.trophy_dir
+        / f"{mock_trophy_title.np_communication_id}.json"
     )
 
     output_file.parent.mkdir(parents=True, exist_ok=True)
     output_file.write_text('{"cached": true}')
 
-    playstation_collector.collect_trophies_for_title(trophy_title)
+    mock_playstation_collector.collect_trophies_for_title(mock_trophy_title)
 
     mock_psn_client.trophies.assert_not_called()
 
@@ -117,22 +119,23 @@ def test_collect_trophies_for_title_skips_cached_file(
 
 
 def test_collect_trophies_for_title_force_overwrites_cache(
-    playstation_collector,
+    mock_playstation_collector,
     mock_psn_client,
-    trophy_title,
-    collected_trophies,
+    mock_trophy_title,
+    mock_collected_trophies,
 ):
     output_file = (
-        playstation_collector.trophy_dir / f"{trophy_title.np_communication_id}.json"
+        mock_playstation_collector.trophy_dir
+        / f"{mock_trophy_title.np_communication_id}.json"
     )
 
     output_file.parent.mkdir(parents=True, exist_ok=True)
     output_file.write_text('{"cached": true}')
 
-    mock_psn_client.trophies.return_value = collected_trophies
+    mock_psn_client.trophies.return_value = mock_collected_trophies
 
-    playstation_collector.collect_trophies_for_title(
-        trophy_title,
+    mock_playstation_collector.collect_trophies_for_title(
+        mock_trophy_title,
         force=True,
     )
 
@@ -141,11 +144,11 @@ def test_collect_trophies_for_title_force_overwrites_cache(
     with output_file.open() as file:
         result = json.load(file)
 
-    assert result == collected_trophies
+    assert result == mock_collected_trophies
 
 
 def test_collect_all_trophies(
-    playstation_collector,
+    mock_playstation_collector,
 ):
     trophy_title_1 = Mock()
     trophy_title_1.title_name = "Test Game 1"
@@ -158,21 +161,21 @@ def test_collect_all_trophies(
         trophy_title_2,
     ]
 
-    playstation_collector.collect_trophies_for_title = Mock()
+    mock_playstation_collector.collect_trophies_for_title = Mock()
 
     with patch("time.sleep"):
-        playstation_collector.collect_all_trophies(
+        mock_playstation_collector.collect_all_trophies(
             trophy_titles,
             force=True,
         )
 
-    assert playstation_collector.collect_trophies_for_title.call_args_list == [
+    assert mock_playstation_collector.collect_trophies_for_title.call_args_list == [
         call(trophy_title_1, force=True),
         call(trophy_title_2, force=True),
     ]
 
 
-def test_collect_all_trophies_continues_after_failure(playstation_collector):
+def test_collect_all_trophies_continues_after_failure(mock_playstation_collector):
     trophy_title_1 = Mock()
     trophy_title_1.title_name = "Broken Game"
 
@@ -184,7 +187,7 @@ def test_collect_all_trophies_continues_after_failure(playstation_collector):
         trophy_title_2,
     ]
 
-    playstation_collector.collect_trophies_for_title = Mock(
+    mock_playstation_collector.collect_trophies_for_title = Mock(
         side_effect=[
             Exception("API failure"),
             None,
@@ -192,9 +195,9 @@ def test_collect_all_trophies_continues_after_failure(playstation_collector):
     )
 
     with patch("time.sleep"):
-        playstation_collector.collect_all_trophies(trophy_titles)
+        mock_playstation_collector.collect_all_trophies(trophy_titles)
 
-    assert playstation_collector.collect_trophies_for_title.call_args_list == [
+    assert mock_playstation_collector.collect_trophies_for_title.call_args_list == [
         call(trophy_title_1, force=False),
         call(trophy_title_2, force=False),
     ]
@@ -203,37 +206,39 @@ def test_collect_all_trophies_continues_after_failure(playstation_collector):
 @patch("time.sleep")
 def test_collect_all_trophies_sleeps_after_success(
     mock_sleep,
-    playstation_collector,
+    mock_playstation_collector,
 ):
     trophy_title = Mock()
     trophy_title.title_name = "Test Game"
 
-    playstation_collector.collect_trophies_for_title = Mock()
+    mock_playstation_collector.collect_trophies_for_title = Mock()
 
-    playstation_collector.collect_all_trophies([trophy_title])
+    mock_playstation_collector.collect_all_trophies([trophy_title])
 
     mock_sleep.assert_called_once_with(0.5)
 
 
-def test_collect_all(playstation_collector):
+def test_collect_all(mock_playstation_collector):
     trophy_titles = [
         Mock(),
         Mock(),
     ]
 
-    playstation_collector.collect_profile = Mock()
-    playstation_collector.collect_devices = Mock()
-    playstation_collector.collect_played_titles = Mock()
+    mock_playstation_collector.collect_profile = Mock()
+    mock_playstation_collector.collect_devices = Mock()
+    mock_playstation_collector.collect_played_titles = Mock()
 
-    playstation_collector.collect_trophy_titles = Mock(return_value=trophy_titles)
+    mock_playstation_collector.collect_trophy_titles = Mock(return_value=trophy_titles)
 
-    playstation_collector.collect_all_trophies = Mock()
+    mock_playstation_collector.collect_all_trophies = Mock()
 
-    playstation_collector.collect_all()
+    mock_playstation_collector.collect_all()
 
-    playstation_collector.collect_profile.assert_called_once_with()
-    playstation_collector.collect_devices.assert_called_once_with()
-    playstation_collector.collect_played_titles.assert_called_once_with()
-    playstation_collector.collect_trophy_titles.assert_called_once_with()
+    mock_playstation_collector.collect_profile.assert_called_once_with()
+    mock_playstation_collector.collect_devices.assert_called_once_with()
+    mock_playstation_collector.collect_played_titles.assert_called_once_with()
+    mock_playstation_collector.collect_trophy_titles.assert_called_once_with()
 
-    playstation_collector.collect_all_trophies.assert_called_once_with(trophy_titles)
+    mock_playstation_collector.collect_all_trophies.assert_called_once_with(
+        trophy_titles
+    )
