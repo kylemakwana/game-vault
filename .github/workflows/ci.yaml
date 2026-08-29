@@ -28,5 +28,5 @@ jobs:
       - name: Check imports and linting
         run: uv run ruff check .
 
-      - name: Run unit tests
-        run: uv run pytest
+      - name: Run unit tests with coverage
+        run: uv run pytest --cov=game_vault --cov-report=term-missing
