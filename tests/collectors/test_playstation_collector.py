@@ -1,4 +1,6 @@
 import json
+from datetime import datetime, timedelta
+from enum import Enum
 from unittest.mock import Mock, call, patch
 
 import pytest
@@ -242,3 +244,83 @@ def test_collect_all(mock_playstation_collector):
     mock_playstation_collector.collect_all_trophies.assert_called_once_with(
         trophy_titles
     )
+
+
+class ExampleEnum(Enum):
+    VALUE = "value"
+
+
+class ExampleObject:
+    def __init__(self):
+        self.name = "Minecraft"
+        self.hours = timedelta(hours=2)
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        (
+            datetime(2026, 8, 30, 20, 15, 30),
+            "2026-08-30T20:15:30",
+        ),
+        (
+            timedelta(hours=2, minutes=30),
+            9000,
+        ),
+        (
+            ExampleEnum.VALUE,
+            "value",
+        ),
+        (
+            ["Minecraft", timedelta(minutes=5)],
+            ["Minecraft", 300],
+        ),
+        (
+            ("Minecraft", timedelta(minutes=5)),
+            ["Minecraft", 300],
+        ),
+        (
+            {
+                "game": "Minecraft",
+                "playtime": timedelta(hours=1),
+            },
+            {
+                "game": "Minecraft",
+                "playtime": 3600,
+            },
+        ),
+        (
+            "Minecraft",
+            "Minecraft",
+        ),
+        (
+            123,
+            123,
+        ),
+        (
+            None,
+            None,
+        ),
+    ],
+)
+def test_to_jsonable(mock_playstation_collector, value, expected):
+    assert mock_playstation_collector.to_jsonable(value) == expected
+
+
+def test_to_jsonable_converts_frozenset(mock_playstation_collector):
+    value = frozenset(["Minecraft", "The Witcher 3"])
+
+    result = mock_playstation_collector.to_jsonable(value)
+
+    assert sorted(result) == ["Minecraft", "The Witcher 3"]
+
+
+def test_to_jsonable_converts_object_with_dict(mock_playstation_collector):
+    value = ExampleObject()
+
+    result = mock_playstation_collector.to_jsonable(value)
+
+    assert result == {
+        "name": "Minecraft",
+        "hours": 7200,
+    }
