@@ -35,3 +35,13 @@ select = [
     "F",
     "I",
 ]
+
+[tool.pytest.ini_options]
+addopts = [
+    "--cov=game_vault",
+    "--cov-report=term-missing",
+]
+
+[tool.coverage.report]
+fail_under = 95
+show_missing = true
