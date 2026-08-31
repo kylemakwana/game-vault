@@ -278,3 +278,60 @@ def test_delete_commits_transaction(
     repository.delete(stored_game.id)
 
     assert db_connection.in_transaction is False
+
+
+def test_delete_cascades_to_releases_identifiers_and_mappings(
+    db_connection,
+    stored_game_release,
+    external_identifier,
+):
+    db_connection.execute(
+        """
+        INSERT INTO external_identifier (
+            game_release_id,
+            service,
+            identifier_type,
+            value
+        )
+        VALUES (?, ?, ?, ?)
+        """,
+        (
+            stored_game_release.id,
+            external_identifier.service,
+            external_identifier.identifier_type,
+            external_identifier.value,
+        ),
+    )
+    db_connection.execute(
+        """
+        INSERT INTO source_game_mapping (
+            source,
+            source_id,
+            game_release_id,
+            match_method,
+            confidence
+        )
+        VALUES (?, ?, ?, ?, ?)
+        """,
+        (
+            "playstation",
+            "PPSA17221_00",
+            stored_game_release.id,
+            "manual",
+            1.0,
+        ),
+    )
+    db_connection.commit()
+
+    repository = GameRepository(db_connection)
+
+    assert repository.delete(stored_game_release.game_id) is True
+
+    for table in (
+        "game_release",
+        "external_identifier",
+        "source_game_mapping",
+    ):
+        count = db_connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
+
+        assert count == 0

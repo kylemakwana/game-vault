@@ -1,3 +1,7 @@
+import sqlite3
+
+import pytest
+
 from game_vault.database.game_release_repository import (
     GameReleaseRepository,
 )
@@ -182,6 +186,19 @@ def test_upsert_inserts_game_release(
     assert row["name"] == game_release.name
     assert row["release_date"] == "2014-09-04"
     assert row["image_url"] == game_release.image_url
+
+
+def test_upsert_rejects_release_for_nonexistent_game(
+    db_connection,
+    game_release,
+):
+    repository = GameReleaseRepository(db_connection)
+    orphaned_release = game_release.model_copy(update={"game_id": "does-not-exist"})
+
+    with pytest.raises(sqlite3.IntegrityError):
+        repository.upsert(orphaned_release)
+
+    assert repository.get(orphaned_release.id) is None
 
 
 def test_upsert_inserts_external_identifiers(
