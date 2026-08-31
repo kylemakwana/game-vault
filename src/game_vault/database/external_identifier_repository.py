@@ -53,7 +53,7 @@ class ExternalIdentifierRepository:
         """
         self.connection.execute(
             """
-            INSERT INTO external_identifier (game_release_id,
+            INSERT OR IGNORE INTO external_identifier (game_release_id,
                                              service,
                                              identifier_type,
                                              value)

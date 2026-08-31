@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass, field
 
+from game_vault.config import Platform
 from game_vault.models.achievement import (
     Achievement,
     AchievementGroup,
@@ -42,8 +43,6 @@ class PlaystationMappedData:
 
 class PlaystationMapper:
     """Map a PlayStation snapshot against the curated Game Vault catalog."""
-
-    SERVICE_ID = "playstation_network"
 
     def __init__(
         self,
@@ -157,7 +156,7 @@ class PlaystationMapper:
 
         return PlatformAccount(
             id=f"psn:{account.account_id}",
-            service_id=self.SERVICE_ID,
+            service_id=Platform.PLAYSTATION,
             username=account.online_id,
             external_account_id=account.account_id,
             avatar_url=account.avatar_url,
@@ -203,7 +202,7 @@ class PlaystationMapper:
                     play_count=title.play_count,
                     first_played_at=title.first_played_at,
                     last_played_at=title.last_played_at,
-                    source=self.SERVICE_ID,
+                    source=Platform.PLAYSTATION,
                 )
             )
 
@@ -257,7 +256,7 @@ class PlaystationMapper:
         achievement_set = AchievementSet(
             id=achievement_set_id,
             game_release_id=mapping.game_release_id,
-            service_id=self.SERVICE_ID,
+            service_id=Platform.PLAYSTATION,
             name=trophy_title.title_name,
             external_identifier=trophy_title.np_communication_id,
         )

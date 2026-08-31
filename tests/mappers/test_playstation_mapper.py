@@ -2,6 +2,8 @@ from types import SimpleNamespace
 
 import pytest
 
+from game_vault.config import Platform
+
 
 def test_find_release_mapping_returns_matching_mapping(
     mapper,
@@ -66,7 +68,7 @@ def test_map_account(mapper):
     result = mapper._map_account()
 
     assert result.id == "psn:123456789"
-    assert result.service_id == "playstation_network"
+    assert result.service_id == Platform.PLAYSTATION
     assert result.username == "TestPlayer"
     assert result.external_account_id == "123456789"
     assert result.avatar_url == "https://example.com/avatar.png"
@@ -86,7 +88,7 @@ def test_map_played_titles(mapper):
     assert activity.game_release_id == "test-game-ps5"
     assert activity.playtime_seconds == 7200
     assert activity.play_count == 4
-    assert activity.source == "playstation_network"
+    assert activity.source == Platform.PLAYSTATION
 
 
 def test_map_played_titles_ignores_non_games(
@@ -197,7 +199,7 @@ def test_map_trophy_title_creates_achievement_set(
 
     assert achievement_set.id == "psn-trophy-set:NPWR00001_00"
     assert achievement_set.game_release_id == "test-game-ps5"
-    assert achievement_set.service_id == "playstation_network"
+    assert achievement_set.service_id == Platform.PLAYSTATION
     assert achievement_set.name == "Test Game"
     assert achievement_set.external_identifier == "NPWR00001_00"
 
