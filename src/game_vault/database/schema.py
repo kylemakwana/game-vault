@@ -56,8 +56,31 @@ def create_tables(connection: sqlite3.Connection) -> None:
         """
     )
 
+    connection.execute(
+        """
+        CREATE TABLE source_game_mapping
+        (
+            source          TEXT NOT NULL,
+            source_id       TEXT NOT NULL,
+            game_release_id TEXT NOT NULL,
+            match_method    TEXT NOT NULL,
+            confidence      REAL,
+
+            PRIMARY KEY (
+                         source,
+                         source_id
+                ),
+
+            FOREIGN KEY (game_release_id)
+                REFERENCES game_release(id)
+                ON DELETE CASCADE
+        )
+        """
+    )
+
 
 def drop_tables(connection: sqlite3.Connection) -> None:
+    connection.execute("DROP TABLE IF EXISTS source_game_mapping")
     connection.execute("DROP TABLE IF EXISTS external_identifier")
     connection.execute("DROP TABLE IF EXISTS game_release")
     connection.execute("DROP TABLE IF EXISTS game")

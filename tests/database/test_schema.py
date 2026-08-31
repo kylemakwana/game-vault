@@ -27,6 +27,7 @@ def test_create_tables_creates_expected_tables(
         "game",
         "game_release",
         "external_identifier",
+        "source_game_mapping",
     }
 
 
