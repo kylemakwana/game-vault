@@ -82,7 +82,7 @@ def collect_playstation_data() -> None:
     from game_vault.collectors.playstation_collector import (
         PlayStationCollector,
     )
-    from game_vault.psn import create_psn_client
+    from game_vault.playstation_client import create_psn_client
 
     client = create_psn_client()
 

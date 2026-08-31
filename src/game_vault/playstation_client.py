@@ -1,4 +1,4 @@
-# src/game_vault/psn.py
+# src/game_vault/playstation_client.py
 
 from config import PSN_NPSSO
 from dotenv import load_dotenv

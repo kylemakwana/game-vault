@@ -1,7 +1,22 @@
 import pytest
 from pydantic import ValidationError
 
-from game_vault.models.playstation import PlaystationTrophyGroup, PlaystationTrophyTitle
+from game_vault.models.playstation import (
+    PlaystationTrophyGroup,
+    PlaystationTrophyTitle,
+    TrophyCounts,
+)
+
+
+def test_trophy_counts_total_sums_all_trophy_types():
+    counts = TrophyCounts(
+        bronze=4,
+        silver=3,
+        gold=2,
+        platinum=1,
+    )
+
+    assert counts.total == 10
 
 
 def test_trophy_title_rejects_none_for_boolean_fields():
