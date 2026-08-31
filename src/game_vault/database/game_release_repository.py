@@ -36,6 +36,31 @@ class GameReleaseRepository:
 
         return GameRelease.model_validate(game_release)
 
+    def get_by_game_id(self, game_id: str) -> list[GameRelease]:
+        rows = self.connection.execute(
+            """
+            SELECT id,
+                   game_id,
+                   platform_id,
+                   name,
+                   release_date,
+                   image_url
+            FROM game_release
+            WHERE game_id = ?
+            """,
+            (game_id,),
+        ).fetchall()
+
+        external_identifier_repo = ExternalIdentifierRepository(self.connection)
+        releases = []
+        for row in rows:
+            release = dict(row)
+            ex_ids = external_identifier_repo.get_all_for_release(release["id"])
+            release["external_identifiers"] = ex_ids
+            releases.append(GameRelease.model_validate(release))
+
+        return releases
+
     def get_all(self) -> list[GameRelease]:
         rows = self.connection.execute(
             """

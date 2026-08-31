@@ -5,6 +5,7 @@ import pytest
 from game_vault.database.game_release_repository import (
     GameReleaseRepository,
 )
+from game_vault.database.game_repository import GameRepository
 from game_vault.models.game import GameRelease
 
 
@@ -83,6 +84,70 @@ def test_get_loads_external_identifiers(
         external_identifier.value,
         second_external_identifier.value,
     }
+
+
+def test_get_by_game_id_returns_empty_list_when_game_has_no_releases(
+    db_connection,
+    stored_game,
+):
+    repository = GameReleaseRepository(db_connection)
+
+    result = repository.get_by_game_id(stored_game.id)
+
+    assert result == []
+
+
+def test_get_by_game_id_returns_only_releases_for_requested_game(
+    db_connection,
+    stored_game,
+    second_game,
+    game_release,
+):
+    GameRepository(db_connection).upsert(second_game)
+    repository = GameReleaseRepository(db_connection)
+
+    second_release = game_release.model_copy(
+        update={
+            "id": "minecraft-ps5",
+            "platform_id": "ps5",
+            "name": "Minecraft PS5",
+            "external_identifiers": [],
+        }
+    )
+    unrelated_release = game_release.model_copy(
+        update={
+            "id": "stardew-valley-ps4",
+            "game_id": second_game.id,
+            "name": second_game.name,
+            "external_identifiers": [],
+        }
+    )
+
+    repository.upsert(game_release)
+    repository.upsert(second_release)
+    repository.upsert(unrelated_release)
+
+    result = repository.get_by_game_id(stored_game.id)
+
+    assert {release.id for release in result} == {
+        game_release.id,
+        second_release.id,
+    }
+    assert all(release.game_id == stored_game.id for release in result)
+
+
+def test_get_by_game_id_loads_external_identifiers(
+    db_connection,
+    stored_game,
+    game_release,
+):
+    repository = GameReleaseRepository(db_connection)
+    repository.upsert(game_release)
+
+    result = repository.get_by_game_id(stored_game.id)
+
+    assert len(result) == 1
+    assert result[0].external_identifiers == game_release.external_identifiers
 
 
 def test_get_all_returns_empty_list_when_no_releases_exist(
