@@ -1,4 +1,5 @@
-# config.py
+"""Load environment-backed configuration for Game Vault."""
+
 import os
 
 from dotenv import load_dotenv

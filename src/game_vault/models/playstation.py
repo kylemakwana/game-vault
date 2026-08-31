@@ -1,9 +1,13 @@
+"""Define normalized models for PlayStation snapshot data."""
+
 from datetime import datetime
 
 from pydantic import BaseModel, Field
 
 
 class TrophyCounts(BaseModel):
+    """Store trophy counts by PlayStation trophy type."""
+
     bronze: int = 0
     silver: int = 0
     gold: int = 0
@@ -11,16 +15,24 @@ class TrophyCounts(BaseModel):
 
     @property
     def total(self) -> int:
+        """Return the total number of trophies across all types.
+
+        :return: Sum of bronze, silver, gold, and platinum trophies.
+        """
         return self.bronze + self.silver + self.gold + self.platinum
 
 
 class SnapshotMetadata(BaseModel):
+    """Describe the source, schema, and creation time of a snapshot."""
+
     source: str = "playstation"
     schema_version: str = "0.1.0"
     generated_at: datetime
 
 
 class PlayStationAccount(BaseModel):
+    """Represent the PlayStation account captured by a snapshot."""
+
     online_id: str
     account_id: str
     np_id: str | None = None
@@ -29,17 +41,23 @@ class PlayStationAccount(BaseModel):
 
 
 class TrophySummary(BaseModel):
+    """Summarize an account's trophy level and earned trophies."""
+
     level: int
     level_progress: int
     earned: TrophyCounts
 
 
 class DeviceActivation(BaseModel):
+    """Represent one activation of a PlayStation device."""
+
     activation_type: str
     activation_date: datetime
 
 
 class PlayStationDevice(BaseModel):
+    """Represent a PlayStation device and its account activations."""
+
     device_id: str
     device_name: str | None = None
     device_type: str
@@ -48,6 +66,8 @@ class PlayStationDevice(BaseModel):
 
 
 class PlayedTitle(BaseModel):
+    """Represent a title in the account's PlayStation play history."""
+
     title_id: str
     name: str
     image_url: str | None = None
@@ -64,6 +84,8 @@ class PlayedTitle(BaseModel):
 
 
 class UserTrophyProgress(BaseModel):
+    """Represent account-specific progress for a trophy."""
+
     earned: bool
 
     earned_at: datetime | None = None
@@ -74,6 +96,8 @@ class UserTrophyProgress(BaseModel):
 
 
 class Trophy(BaseModel):
+    """Represent a PlayStation trophy and the user's progress toward it."""
+
     trophy_id: int
     trophy_set_version: str
 
@@ -96,12 +120,16 @@ class Trophy(BaseModel):
 
 
 class PlaystationTrophyGroup(BaseModel):
+    """Group trophies within a PlayStation trophy set."""
+
     group_id: str
     name: str | None = None
     trophies: list[Trophy] = Field(default_factory=list)
 
 
 class PlaystationTrophyTitle(BaseModel):
+    """Represent a PlayStation title and its complete trophy set."""
+
     np_communication_id: str
     np_service_name: str
     np_title_id: str | None = None
@@ -127,6 +155,8 @@ class PlaystationTrophyTitle(BaseModel):
 
 
 class ValidationResult(BaseModel):
+    """Describe the completeness and consistency of imported snapshot data."""
+
     trophy_title_summary_complete: bool
     trophy_detail_import_complete: bool
 
@@ -145,6 +175,8 @@ class ValidationResult(BaseModel):
 
 
 class PlayStationSnapshot(BaseModel):
+    """Aggregate normalized account, activity, device, and trophy data."""
+
     snapshot: SnapshotMetadata
 
     account: PlayStationAccount

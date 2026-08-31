@@ -1,3 +1,5 @@
+"""Map normalized PlayStation snapshots into Game Vault domain records."""
+
 from dataclasses import dataclass, field
 
 from game_vault.models.achievement import (
@@ -19,6 +21,8 @@ from game_vault.models.series import GameSeries, GameSeriesMembership
 
 @dataclass
 class PlaystationMappedData:
+    """Collect all domain records produced from a PlayStation snapshot."""
+
     games: list[Game]
     releases: list[GameRelease] = field(default_factory=list)
 
@@ -37,6 +41,8 @@ class PlaystationMappedData:
 
 
 class PlaystationMapper:
+    """Map a PlayStation snapshot against the curated Game Vault catalog."""
+
     SERVICE_ID = "playstation_network"
 
     def __init__(
@@ -48,6 +54,15 @@ class PlaystationMapper:
         series: list[GameSeries],
         series_memberships: list[GameSeriesMembership],
     ):
+        """Initialize the mapper.
+
+        :param snapshot: Normalized PlayStation snapshot to map.
+        :param mappings: Known source identifiers and their catalog releases.
+        :param releases: Curated platform-specific game releases.
+        :param games: Curated platform-independent games.
+        :param series: Curated game series.
+        :param series_memberships: Curated game-to-series memberships.
+        """
         self.snapshot = snapshot
         self.mappings = mappings
         self.releases: dict[str, GameRelease] = {
@@ -62,6 +77,12 @@ class PlaystationMapper:
         source_id: str,
         source: str,
     ) -> SourceGameMapping | None:
+        """Find a source mapping by namespace and identifier.
+
+        :param source_id: Identifier within the external source.
+        :param source: External source namespace.
+        :return: Matching mapping, or ``None`` when it does not exist.
+        """
         return next(
             (
                 mapping
@@ -72,6 +93,10 @@ class PlaystationMapper:
         )
 
     def _mapped_releases(self) -> list[GameRelease]:
+        """Return catalog releases referenced by source mappings.
+
+        :return: Mapped catalog releases.
+        """
         release_ids = {mapping.game_release_id for mapping in self.mappings}
 
         return [
@@ -81,6 +106,10 @@ class PlaystationMapper:
         ]
 
     def _mapped_games(self) -> list[Game]:
+        """Return games owning the mapped releases.
+
+        :return: Mapped catalog games.
+        """
         game_ids = {release.game_id for release in self._mapped_releases()}
 
         return [game for game_id, game in self.games.items() if game_id in game_ids]
@@ -89,6 +118,11 @@ class PlaystationMapper:
         self,
         games: list[Game],
     ) -> list[GameSeriesMembership]:
+        """Return series memberships for mapped games.
+
+        :param games: Mapped catalog games.
+        :return: Memberships associated with the mapped games.
+        """
         game_ids = {game.id for game in games}
 
         return [
@@ -101,6 +135,11 @@ class PlaystationMapper:
         self,
         memberships: list[GameSeriesMembership],
     ) -> list[GameSeries]:
+        """Return series referenced by mapped memberships.
+
+        :param memberships: Mapped game-to-series memberships.
+        :return: Referenced game series.
+        """
         series_ids = {membership.series_id for membership in memberships}
 
         return [
@@ -110,6 +149,10 @@ class PlaystationMapper:
         ]
 
     def _map_account(self) -> PlatformAccount:
+        """Map the snapshot account into a platform account.
+
+        :return: Game Vault platform account.
+        """
         account = self.snapshot.account
 
         return PlatformAccount(
@@ -124,6 +167,14 @@ class PlaystationMapper:
         self,
         account: PlatformAccount,
     ) -> list[PlayActivity]:
+        """Map eligible played titles into gameplay activities.
+
+        Applications, unmapped titles, and mappings without catalog releases are
+        omitted.
+
+        :param account: Platform account that owns the activities.
+        :return: Mapped gameplay activities.
+        """
         activities: list[PlayActivity] = []
 
         for title in self.snapshot.played_titles:
@@ -160,6 +211,11 @@ class PlaystationMapper:
 
     @staticmethod
     def _platform_from_category(category: str) -> str:
+        """Convert a PlayStation category into a platform identifier.
+
+        :param category: PlayStation title category.
+        :return: Game Vault platform identifier.
+        """
         match category:
             case "ps5_native_game":
                 return "ps5"
@@ -181,6 +237,13 @@ class PlaystationMapper:
         ]
         | None
     ):
+        """Map one trophy title into achievements and account progress.
+
+        :param trophy_title: Normalized PlayStation trophy title.
+        :param account: Platform account that owns the trophy progress.
+        :return: Achievement set, groups, achievements, and progress records, or
+            ``None`` when the trophy title has no catalog mapping.
+        """
         mapping = self._find_release_mapping(
             source_id=trophy_title.np_communication_id,
             source="playstation_trophy_set",
@@ -259,6 +322,11 @@ class PlaystationMapper:
         list[Achievement],
         list[AchievementProgress],
     ]:
+        """Map every eligible trophy title in the snapshot.
+
+        :param account: Platform account that owns the trophy progress.
+        :return: Achievement sets, groups, achievements, and progress records.
+        """
         sets = []
         groups = []
         achievements = []
@@ -290,6 +358,10 @@ class PlaystationMapper:
         )
 
     def map(self) -> PlaystationMappedData:
+        """Map the snapshot into all supported Game Vault domain records.
+
+        :return: Aggregated mapped PlayStation data.
+        """
         account = self._map_account()
 
         releases = self._mapped_releases()

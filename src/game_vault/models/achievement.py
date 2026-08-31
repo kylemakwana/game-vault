@@ -1,9 +1,13 @@
+"""Define achievement and achievement-progress models."""
+
 from datetime import datetime
 
 from pydantic import BaseModel
 
 
 class Achievement(BaseModel):
+    """Represent an achievement exposed by a gaming service."""
+
     id: str
     achievement_set_id: str
     group_id: str
@@ -19,6 +23,8 @@ class Achievement(BaseModel):
 
 
 class AchievementGroup(BaseModel):
+    """Group related achievements within an achievement set."""
+
     id: str
     achievement_set_id: str
     external_group_id: str
@@ -26,6 +32,8 @@ class AchievementGroup(BaseModel):
 
 
 class AchievementSet(BaseModel):
+    """Represent a service-specific achievement set for a game release."""
+
     id: str
     game_release_id: str
     service_id: str
@@ -34,6 +42,8 @@ class AchievementSet(BaseModel):
 
 
 class AchievementProgress(BaseModel):
+    """Record an account's progress toward an achievement."""
+
     achievement_id: str
     account_id: str
     unlocked: bool

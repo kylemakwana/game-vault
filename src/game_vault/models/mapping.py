@@ -1,7 +1,11 @@
+"""Define mappings from external sources to catalog releases."""
+
 from pydantic import BaseModel
 
 
 class SourceGameMapping(BaseModel):
+    """Map a source-specific identifier to a game release."""
+
     source: str
     source_id: str
 

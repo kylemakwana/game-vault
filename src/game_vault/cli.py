@@ -1,3 +1,5 @@
+"""Provide the Game Vault command-line interface."""
+
 import argparse
 from pathlib import Path
 from pprint import pprint
@@ -9,6 +11,7 @@ from game_vault.models.series import GameSeries, GameSeriesMembership
 
 
 def main() -> None:
+    """Parse command-line arguments and dispatch the selected platform command."""
     parser = argparse.ArgumentParser(
         prog="game-vault",
         description="Game Vault CLI",
@@ -61,6 +64,10 @@ def main() -> None:
 
 
 def handle_psn_command(command: str) -> None:
+    """Dispatch a PlayStation command.
+
+    :param command: PlayStation subcommand selected by the user.
+    """
     if command == "collect":
         collect_playstation_data()
 
@@ -79,6 +86,7 @@ def handle_psn_command(command: str) -> None:
 
 
 def collect_playstation_data() -> None:
+    """Collect PlayStation account data and cache it locally."""
     from game_vault.collectors.playstation_collector import (
         PlayStationCollector,
     )
@@ -91,6 +99,7 @@ def collect_playstation_data() -> None:
 
 
 def build_playstation_snapshot() -> None:
+    """Build and write a normalized PlayStation snapshot from cached data."""
     from pathlib import Path
 
     from game_vault.services.playstation_snapshot_builder import (
@@ -115,6 +124,7 @@ def build_playstation_snapshot() -> None:
 
 
 def validate_playstation_snapshot() -> None:
+    """Validate cached PlayStation data and print the validation summary."""
     from game_vault.services.playstation_snapshot_builder import (
         PlayStationSnapshotBuilder,
     )
@@ -136,6 +146,7 @@ def validate_playstation_snapshot() -> None:
 
 
 def map_playstation_snapshot() -> None:
+    """Map the cached PlayStation snapshot into Game Vault domain records."""
     from game_vault.mappers.playstation_mapper import (
         PlaystationMapper,
     )

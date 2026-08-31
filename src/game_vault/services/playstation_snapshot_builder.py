@@ -1,3 +1,5 @@
+"""Build and validate normalized PlayStation snapshots from cached JSON."""
+
 import json
 from collections import defaultdict
 from datetime import UTC, datetime
@@ -42,15 +44,32 @@ TROPHY_RARITY_MAP = {
 
 
 class PlayStationSnapshotBuilder:
+    """Transform cached PlayStation API responses into domain models."""
+
     def __init__(self, raw_dir: Path = Path("data/playstation/raw")):
+        """Initialize the snapshot builder.
+
+        :param raw_dir: Directory containing cached PlayStation JSON responses.
+        """
         self.raw_dir = raw_dir
         self.trophy_dir = raw_dir / "trophies"
 
     @staticmethod
     def _read_json(path: Path):
+        """Read and decode a UTF-8 JSON file.
+
+        :param path: JSON file to read.
+        :return: Decoded JSON value.
+        :raises OSError: If the file cannot be read.
+        :raises json.JSONDecodeError: If the file contains invalid JSON.
+        """
         return json.loads(path.read_text(encoding="utf-8"))
 
     def build(self) -> PlayStationSnapshot:
+        """Build a normalized snapshot from all cached PlayStation data.
+
+        :return: Complete normalized PlayStation snapshot.
+        """
         profile = self._read_json(self.raw_dir / "profile.json")
         devices = self._read_json(self.raw_dir / "devices.json")
         played_titles = self._read_json(self.raw_dir / "played_titles.json")
@@ -81,6 +100,10 @@ class PlayStationSnapshotBuilder:
         )
 
     def validate(self) -> ValidationResult:
+        """Validate cached trophy data without building a complete snapshot.
+
+        :return: Trophy import completeness and consistency results.
+        """
         profile = self._read_json(self.raw_dir / "profile.json")
         trophy_summary = self._build_trophy_summary(profile)
         trophy_titles = self._read_json(self.raw_dir / "trophy_titles.json")
@@ -98,6 +121,11 @@ class PlayStationSnapshotBuilder:
 
     @staticmethod
     def _build_account(legacy_profile: dict) -> PlayStationAccount:
+        """Build an account model from a legacy profile response.
+
+        :param legacy_profile: Legacy PlayStation profile response.
+        :return: Normalized PlayStation account.
+        """
         profile = legacy_profile["profile"]
 
         avatar_urls = profile.get("avatarUrls", [])
@@ -119,6 +147,11 @@ class PlayStationSnapshotBuilder:
     def _build_trophy_summary(
         profile: dict,
     ) -> TrophySummary:
+        """Build a trophy summary from a profile response.
+
+        :param profile: Legacy PlayStation profile response.
+        :return: Normalized trophy summary.
+        """
         trophy_summary = profile["profile"]["trophySummary"]
         earned = trophy_summary["earnedTrophies"]
 
@@ -135,6 +168,11 @@ class PlayStationSnapshotBuilder:
 
     @staticmethod
     def _build_devices(devices: list[dict]) -> list[PlayStationDevice]:
+        """Group device activation records into normalized devices.
+
+        :param devices: Raw device activation records.
+        :return: Normalized PlayStation devices.
+        """
         grouped_devices: dict[str, list[dict]] = defaultdict(list)
 
         for device in devices:
@@ -169,6 +207,11 @@ class PlayStationSnapshotBuilder:
 
     @staticmethod
     def _classify_title(title) -> tuple[str, str]:
+        """Classify a played title as a game or application.
+
+        :param title: Raw played-title record.
+        :return: Content type and the classification method used.
+        """
         category = title.get("category", "")
         name = title.get("name", "")
 
@@ -187,6 +230,11 @@ class PlayStationSnapshotBuilder:
         self,
         played_titles: list[dict],
     ) -> list[PlayedTitle]:
+        """Build normalized played-title records.
+
+        :param played_titles: Raw played-title records.
+        :return: Normalized played titles.
+        """
         titles = []
 
         for title in played_titles:
@@ -212,6 +260,11 @@ class PlayStationSnapshotBuilder:
     def _build_trophy_titles(
         self, trophy_titles: list[dict]
     ) -> list[PlaystationTrophyTitle]:
+        """Build trophy-title models and attach cached trophy details.
+
+        :param trophy_titles: Raw trophy-title summary records.
+        :return: Normalized trophy titles.
+        """
         result = []
 
         for title in trophy_titles:
@@ -254,6 +307,11 @@ class PlayStationSnapshotBuilder:
 
     @staticmethod
     def _convert_trophy_counts(psn_counts: dict) -> TrophyCounts:
+        """Convert PlayStation trophy counts into a normalized model.
+
+        :param psn_counts: Mapping of trophy types to counts.
+        :return: Normalized trophy counts.
+        """
         return TrophyCounts(
             bronze=psn_counts["bronze"],
             silver=psn_counts["silver"],
@@ -265,6 +323,11 @@ class PlayStationSnapshotBuilder:
         self,
         trophies: list[dict],
     ) -> list[PlaystationTrophyGroup]:
+        """Group raw trophy records by their PlayStation group identifier.
+
+        :param trophies: Raw trophy-detail records.
+        :return: Normalized trophy groups.
+        """
         grouped: dict[str, list[dict]] = defaultdict(list)
 
         for trophy in trophies:
@@ -280,6 +343,11 @@ class PlayStationSnapshotBuilder:
 
     @staticmethod
     def _build_trophy(trophy: dict) -> Trophy:
+        """Build a normalized trophy from a raw detail record.
+
+        :param trophy: Raw trophy-detail record.
+        :return: Normalized trophy model.
+        """
         earn_rate: str | None = trophy.get("trophy_earn_rate")
 
         rarity_value: int | None = trophy.get("trophy_rarity")
@@ -314,6 +382,11 @@ class PlayStationSnapshotBuilder:
         self,
         trophy_titles: list[dict],
     ) -> int:
+        """Count trophy titles with cached detail files.
+
+        :param trophy_titles: Raw trophy-title summary records.
+        :return: Number of titles with cached trophy details.
+        """
         return sum(
             1
             for title in trophy_titles
@@ -327,6 +400,14 @@ class PlayStationSnapshotBuilder:
         expected_trophy_titles_count: int,
         imported_trophy_detail_sets_count: int,
     ) -> ValidationResult:
+        """Build completeness and trophy-total validation results.
+
+        :param trophy_summary: Trophy totals reported by the account profile.
+        :param trophy_titles: Imported trophy-title summaries.
+        :param expected_trophy_titles_count: Number of expected title summaries.
+        :param imported_trophy_detail_sets_count: Number of cached detail sets.
+        :return: Snapshot validation result and any warnings.
+        """
         profile_totals = trophy_summary.earned
 
         imported_totals = TrophyCounts(

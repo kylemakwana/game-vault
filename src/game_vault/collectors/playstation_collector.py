@@ -1,3 +1,5 @@
+"""Collect and cache raw data from the PlayStation Network API."""
+
 import json
 import time
 from datetime import datetime, timedelta
@@ -8,11 +10,18 @@ from psnawp_api.models.client import Client
 
 
 class PlayStationCollector:
+    """Collect PlayStation account data and serialize it as JSON."""
+
     def __init__(
         self,
         client: Client,
         raw_dir: Path = Path("data/playstation/raw"),
     ) -> None:
+        """Initialize the collector and create its cache directories.
+
+        :param client: Authenticated PlayStation Network account client.
+        :param raw_dir: Directory in which raw API responses are cached.
+        """
         self.client = client
         self.raw_dir = raw_dir
         self.trophy_dir = self.raw_dir / "trophies"
@@ -22,12 +31,26 @@ class PlayStationCollector:
 
     @staticmethod
     def _write_json(path: Path, data: dict | list) -> None:
+        """Serialize data to an indented UTF-8 JSON file.
+
+        :param path: Destination file path.
+        :param data: JSON-compatible dictionary or list to serialize.
+        :raises OSError: If the destination cannot be written.
+        """
         path.write_text(
             json.dumps(data, indent=2),
             encoding="utf-8",
         )
 
     def to_jsonable(self, value):
+        """Recursively convert API values into JSON-compatible values.
+
+        Datetimes become ISO 8601 strings, timedeltas become whole seconds, enums
+        become their values, and objects are represented by their attributes.
+
+        :param value: Value returned by the PlayStation API.
+        :return: JSON-compatible representation of ``value``.
+        """
         if isinstance(value, datetime):
             return value.isoformat()
 
@@ -55,6 +78,7 @@ class PlayStationCollector:
         return value
 
     def collect_profile(self) -> None:
+        """Collect and cache the legacy account profile."""
         profile = self.client.get_profile_legacy()
 
         self._write_json(
@@ -63,6 +87,7 @@ class PlayStationCollector:
         )
 
     def collect_devices(self) -> None:
+        """Collect and cache devices associated with the account."""
         devices = self.client.get_account_devices()
 
         self._write_json(
@@ -71,6 +96,7 @@ class PlayStationCollector:
         )
 
     def collect_played_titles(self) -> None:
+        """Collect and cache the account's played-title history."""
         titles = list(self.client.title_stats())
 
         self._write_json(
@@ -79,6 +105,10 @@ class PlayStationCollector:
         )
 
     def collect_trophy_titles(self) -> list:
+        """Collect and cache the account's trophy-title summaries.
+
+        :return: Trophy-title objects returned by the PlayStation API.
+        """
         titles = list(self.client.trophy_titles())
 
         self._write_json(
@@ -93,6 +123,11 @@ class PlayStationCollector:
         trophy_title,
         force: bool = False,
     ) -> None:
+        """Collect and cache detailed trophies for one title.
+
+        :param trophy_title: API trophy-title object to collect.
+        :param force: Whether to replace an existing cached response.
+        """
         output_path = self.trophy_dir / f"{trophy_title.np_communication_id}.json"
 
         if output_path.exists() and not force:
@@ -120,6 +155,14 @@ class PlayStationCollector:
         trophy_titles: list,
         force: bool = False,
     ) -> None:
+        """Collect detailed trophies for a sequence of titles.
+
+        Individual title failures are reported and do not stop the remaining
+        collection.
+
+        :param trophy_titles: API trophy-title objects to collect.
+        :param force: Whether to replace existing cached responses.
+        """
         total = len(trophy_titles)
 
         for index, trophy_title in enumerate(
@@ -140,6 +183,7 @@ class PlayStationCollector:
             time.sleep(0.5)
 
     def collect_all(self) -> None:
+        """Collect and cache every supported PlayStation account dataset."""
         print("Collecting profile... [1/5]")
         self.collect_profile()
         print("Profile collected\n")

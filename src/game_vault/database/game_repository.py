@@ -1,14 +1,27 @@
+"""Persist and retrieve games from SQLite."""
+
 import sqlite3
 
 from game_vault.models.game import Game
 
 
 class GameRepository:
+    """Provide persistence operations for :class:`~game_vault.models.game.Game`."""
+
     def __init__(self, connection: sqlite3.Connection):
+        """Initialize the repository.
+
+        :param connection: Open SQLite connection containing the Game Vault schema.
+        """
         self.connection = connection
 
     @staticmethod
     def _row_to_game(row: sqlite3.Row) -> Game:
+        """Convert a database row into a game model.
+
+        :param row: SQLite row containing game columns.
+        :return: Validated game model.
+        """
         game = dict(row)
 
         genres = row["genres"]
@@ -18,6 +31,11 @@ class GameRepository:
         return Game.model_validate(game)
 
     def get(self, game_id: str) -> Game | None:
+        """Return a game by identifier.
+
+        :param game_id: Catalog game identifier.
+        :return: Matching game, or ``None`` when it does not exist.
+        """
         row = self.connection.execute(
             """
             SELECT id,
@@ -40,6 +58,10 @@ class GameRepository:
         return self._row_to_game(row)
 
     def get_all(self) -> list[Game]:
+        """Return every stored game.
+
+        :return: Stored games in database order.
+        """
         rows = self.connection.execute(
             """
             SELECT id,
@@ -57,6 +79,13 @@ class GameRepository:
         return [self._row_to_game(row) for row in rows]
 
     def upsert(self, game: Game) -> None:
+        """Insert a game or update its existing record.
+
+        Existing optional metadata is preserved when the corresponding incoming
+        value is ``None``.
+
+        :param game: Game to persist.
+        """
         self.connection.execute(
             """
             INSERT INTO game (id,
@@ -92,6 +121,11 @@ class GameRepository:
         self.connection.commit()
 
     def delete(self, game_id: str) -> bool:
+        """Delete a game and its dependent records.
+
+        :param game_id: Catalog game identifier.
+        :return: ``True`` when a row was deleted, otherwise ``False``.
+        """
         cursor = self.connection.execute(
             """
             DELETE

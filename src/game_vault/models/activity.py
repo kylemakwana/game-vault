@@ -1,9 +1,13 @@
+"""Define gameplay activity models."""
+
 from datetime import datetime
 
 from pydantic import BaseModel
 
 
 class PlayActivity(BaseModel):
+    """Represent an account's recorded activity for a game release."""
+
     id: str
 
     account_id: str

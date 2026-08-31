@@ -1,3 +1,5 @@
+"""Define games and their platform-specific releases."""
+
 from datetime import date
 
 from pydantic import BaseModel, Field
@@ -6,6 +8,8 @@ from game_vault.models.platform import ExternalIdentifier
 
 
 class Game(BaseModel):
+    """Represent a platform-independent game."""
+
     id: str
 
     name: str
@@ -22,6 +26,8 @@ class Game(BaseModel):
 
 
 class GameRelease(BaseModel):
+    """Represent a game release for a specific platform."""
+
     id: str
 
     game_id: str

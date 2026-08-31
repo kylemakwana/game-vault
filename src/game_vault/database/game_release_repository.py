@@ -1,3 +1,5 @@
+"""Persist and retrieve platform-specific game releases from SQLite."""
+
 import sqlite3
 
 from game_vault.database.external_identifier_repository import (
@@ -7,10 +9,21 @@ from game_vault.models.game import GameRelease
 
 
 class GameReleaseRepository:
+    """Provide persistence operations for game releases."""
+
     def __init__(self, connection: sqlite3.Connection):
+        """Initialize the repository.
+
+        :param connection: Open SQLite connection containing the Game Vault schema.
+        """
         self.connection = connection
 
     def get(self, game_release_id: str) -> GameRelease | None:
+        """Return a release and its external identifiers.
+
+        :param game_release_id: Catalog release identifier.
+        :return: Matching release, or ``None`` when it does not exist.
+        """
         row = self.connection.execute(
             """
             SELECT id,
@@ -37,6 +50,11 @@ class GameReleaseRepository:
         return GameRelease.model_validate(game_release)
 
     def get_by_game_id(self, game_id: str) -> list[GameRelease]:
+        """Return all releases belonging to a game.
+
+        :param game_id: Catalog game identifier.
+        :return: Matching releases with their external identifiers.
+        """
         rows = self.connection.execute(
             """
             SELECT id,
@@ -62,6 +80,10 @@ class GameReleaseRepository:
         return releases
 
     def get_all(self) -> list[GameRelease]:
+        """Return every stored release with its external identifiers.
+
+        :return: Stored releases in database order.
+        """
         rows = self.connection.execute(
             """
             SELECT id,
@@ -90,6 +112,14 @@ class GameReleaseRepository:
         return releases
 
     def upsert(self, game_release: GameRelease) -> None:
+        """Insert a release or update it and add its external identifiers.
+
+        Existing optional metadata is preserved when the corresponding incoming
+        value is ``None``.
+
+        :param game_release: Release to persist.
+        :raises sqlite3.IntegrityError: If the release references an unknown game.
+        """
         self.connection.execute(
             """
             INSERT INTO game_release (id,
@@ -136,6 +166,11 @@ class GameReleaseRepository:
         self.connection.commit()
 
     def delete(self, game_release_id: str) -> bool:
+        """Delete a release and its dependent records.
+
+        :param game_release_id: Catalog release identifier.
+        :return: ``True`` when a row was deleted, otherwise ``False``.
+        """
         cursor = self.connection.execute(
             """
             DELETE

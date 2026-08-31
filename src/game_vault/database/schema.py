@@ -1,7 +1,15 @@
+"""Create and remove the Game Vault SQLite schema."""
+
 import sqlite3
 
 
 def create_tables(connection: sqlite3.Connection) -> None:
+    """Create all Game Vault database tables.
+
+    :param connection: Open SQLite connection on which to create the schema.
+    :raises sqlite3.OperationalError: If a table already exists or SQL execution
+        otherwise fails.
+    """
     connection.execute(
         """
         CREATE TABLE game (
@@ -80,6 +88,12 @@ def create_tables(connection: sqlite3.Connection) -> None:
 
 
 def drop_tables(connection: sqlite3.Connection) -> None:
+    """Drop all Game Vault database tables if they exist.
+
+    Tables are removed in dependency order.
+
+    :param connection: Open SQLite connection from which to remove the schema.
+    """
     connection.execute("DROP TABLE IF EXISTS source_game_mapping")
     connection.execute("DROP TABLE IF EXISTS external_identifier")
     connection.execute("DROP TABLE IF EXISTS game_release")
