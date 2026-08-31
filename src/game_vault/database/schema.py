@@ -58,6 +58,6 @@ def create_tables(connection: sqlite3.Connection) -> None:
 
 
 def drop_tables(connection: sqlite3.Connection) -> None:
+    connection.execute("DROP TABLE IF EXISTS external_identifier")
     connection.execute("DROP TABLE IF EXISTS game_release")
     connection.execute("DROP TABLE IF EXISTS game")
-    connection.execute("DROP TABLE IF EXISTS external_identifier")

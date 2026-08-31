@@ -10,7 +10,10 @@ class GameRepository:
     @staticmethod
     def _row_to_game(row: sqlite3.Row) -> Game:
         game = dict(row)
-        game["genres"] = row["genres"].split(", ")
+
+        genres = row["genres"]
+
+        game["genres"] = genres.split(", ") if genres else []
 
         return Game.model_validate(game)
 

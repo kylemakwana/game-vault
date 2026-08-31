@@ -40,16 +40,29 @@ class GameReleaseRepository:
         rows = self.connection.execute(
             """
             SELECT id,
-                game_id,
-                platform_id,
-                name,
-                release_date,
-                image_url
+                   game_id,
+                   platform_id,
+                   name,
+                   release_date,
+                   image_url
             FROM game_release
             """
         ).fetchall()
 
-        return [GameRelease.model_validate(dict(row)) for row in rows]
+        external_identifier_repo = ExternalIdentifierRepository(self.connection)
+
+        releases = []
+
+        for row in rows:
+            release = dict(row)
+
+            release["external_identifiers"] = (
+                external_identifier_repo.get_all_for_release(row["id"])
+            )
+
+            releases.append(GameRelease.model_validate(release))
+
+        return releases
 
     def upsert(self, game_release: GameRelease) -> None:
         self.connection.execute(
