@@ -9,7 +9,7 @@ class Achievement(BaseModel):
     """Represent an achievement exposed by a gaming service."""
 
     id: str
-    achievement_set_id: str
+    game_release_id: str
     group_id: str
     external_id: str
     name: str
@@ -23,22 +23,11 @@ class Achievement(BaseModel):
 
 
 class AchievementGroup(BaseModel):
-    """Group related achievements within an achievement set."""
+    """Group related achievements for a game release."""
 
     id: str
-    achievement_set_id: str
     external_group_id: str
     name: str | None = None
-
-
-class AchievementSet(BaseModel):
-    """Represent a service-specific achievement set for a game release."""
-
-    id: str
-    game_release_id: str
-    service_id: str
-    name: str | None = None
-    external_identifier: str | None = None
 
 
 class AchievementProgress(BaseModel):

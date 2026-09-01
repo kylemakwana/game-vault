@@ -17,6 +17,15 @@ class Platform(StrEnum):
     STEAM = "Steam"
 
 
+class PlayStationConsole(StrEnum):
+    """PlayStation Console enum."""
+
+    PS5 = "PS5"
+    PS4 = "PS4"
+    PS3 = "PS3"
+    PS_UNKNOWN = "Unknown PlayStation console"
+
+
 class IdentifierType(StrEnum):
     """Identifier enum."""
 

@@ -2,12 +2,11 @@
 
 from dataclasses import dataclass, field
 
-from game_vault.config import Platform
+from game_vault.config import Platform, PlayStationConsole
 from game_vault.models.achievement import (
     Achievement,
     AchievementGroup,
     AchievementProgress,
-    AchievementSet,
 )
 from game_vault.models.activity import PlayActivity
 from game_vault.models.game import (
@@ -32,7 +31,6 @@ class PlayStationMappedData:
 
     activities: list[PlayActivity] = field(default_factory=list)
 
-    achievement_sets: list[AchievementSet] = field(default_factory=list)
     achievement_groups: list[AchievementGroup] = field(default_factory=list)
     achievements: list[Achievement] = field(default_factory=list)
     achievement_progress: list[AchievementProgress] = field(default_factory=list)
@@ -209,7 +207,7 @@ class PlayStationMapper:
         return activities
 
     @staticmethod
-    def _platform_from_category(category: str) -> str:
+    def _platform_from_category(category: str) -> PlayStationConsole:
         """Convert a PlayStation category into a platform identifier.
 
         :param category: PlayStation title category.
@@ -217,11 +215,11 @@ class PlayStationMapper:
         """
         match category:
             case "ps5_native_game":
-                return "ps5"
+                return PlayStationConsole.PS5
             case "ps4_game":
-                return "ps4"
+                return PlayStationConsole.PS4
             case _:
-                return "playstation_unknown"
+                return PlayStationConsole.PS_UNKNOWN
 
     def _map_trophy_title(
         self,
@@ -229,7 +227,6 @@ class PlayStationMapper:
         account: PlatformAccount,
     ) -> (
         tuple[
-            AchievementSet,
             list[AchievementGroup],
             list[Achievement],
             list[AchievementProgress],
@@ -240,7 +237,7 @@ class PlayStationMapper:
 
         :param trophy_title: Normalized PlayStation trophy title.
         :param account: Platform account that owns the trophy progress.
-        :return: Achievement set, groups, achievements, and progress records, or
+        :return: Achievement groups, achievements, and progress records, or
             ``None`` when the trophy title has no catalog mapping.
         """
         mapping = self._find_release_mapping(
@@ -251,37 +248,28 @@ class PlayStationMapper:
         if mapping is None:
             return None
 
-        achievement_set_id = f"psn-trophy-set:{trophy_title.np_communication_id}"
-
-        achievement_set = AchievementSet(
-            id=achievement_set_id,
-            game_release_id=mapping.game_release_id,
-            service_id=Platform.PLAYSTATION,
-            name=trophy_title.title_name,
-            external_identifier=trophy_title.np_communication_id,
-        )
-
-        groups: list[AchievementGroup] = []
+        achievement_groups: list[AchievementGroup] = []
         achievements: list[Achievement] = []
         progress_records: list[AchievementProgress] = []
 
         for trophy_group in trophy_title.groups:
-            group_id = f"{achievement_set_id}:{trophy_group.group_id}"
+            group_id = f"{mapping.game_release_id}-achievements-{trophy_group.group_id}"
 
             group = AchievementGroup(
                 id=group_id,
-                achievement_set_id=achievement_set_id,
                 external_group_id=trophy_group.group_id,
                 name=trophy_group.name,
             )
 
-            groups.append(group)
+            achievement_groups.append(group)
 
             for trophy in trophy_group.trophies:
-                achievement_id = f"{achievement_set_id}:{trophy.trophy_id}"
+                achievement_id = (
+                    f"{mapping.game_release_id}-achievement-{trophy.trophy_id}"
+                )
                 achievement = Achievement(
                     id=achievement_id,
-                    achievement_set_id=achievement_set_id,
+                    game_release_id=mapping.game_release_id,
                     group_id=group_id,
                     external_id=str(trophy.trophy_id),
                     name=trophy.name,
@@ -310,13 +298,12 @@ class PlayStationMapper:
 
                 progress_records.append(progress)
 
-        return achievement_set, groups, achievements, progress_records
+        return achievement_groups, achievements, progress_records
 
     def _map_trophy_titles(
         self,
         account: PlatformAccount,
     ) -> tuple[
-        list[AchievementSet],
         list[AchievementGroup],
         list[Achievement],
         list[AchievementProgress],
@@ -324,9 +311,8 @@ class PlayStationMapper:
         """Map every eligible trophy title in the snapshot.
 
         :param account: Platform account that owns the trophy progress.
-        :return: Achievement sets, groups, achievements, and progress records.
+        :return: Achievement groups, achievements, and progress records.
         """
-        sets = []
         groups = []
         achievements = []
         progress_records = []
@@ -338,19 +324,16 @@ class PlayStationMapper:
                 continue
 
             (
-                achievement_set,
                 mapped_groups,
                 mapped_achievements,
                 mapped_progress,
             ) = mapped
 
-            sets.append(achievement_set)
             groups.extend(mapped_groups)
             achievements.extend(mapped_achievements)
             progress_records.extend(mapped_progress)
 
         return (
-            sets,
             groups,
             achievements,
             progress_records,
@@ -370,7 +353,7 @@ class PlayStationMapper:
 
         activities = self._map_played_titles(account)
 
-        (achievement_sets, achievement_groups, achievements, achievement_progress) = (
+        (achievement_groups, achievements, achievement_progress) = (
             self._map_trophy_titles(account)
         )
 
@@ -381,7 +364,6 @@ class PlayStationMapper:
             series=series,
             series_membership=series_memberships,
             activities=activities,
-            achievement_sets=achievement_sets,
             achievement_groups=achievement_groups,
             achievements=achievements,
             achievement_progress=achievement_progress,

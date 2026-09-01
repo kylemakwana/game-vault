@@ -2,7 +2,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from game_vault.config import Platform
+from game_vault.config import Platform, PlayStationConsole
 
 
 def test_find_release_mapping_returns_matching_mapping(
@@ -153,10 +153,10 @@ def test_map_played_titles_ignores_mapping_without_release(
 @pytest.mark.parametrize(
     ("category", "expected"),
     [
-        ("ps5_native_game", "ps5"),
-        ("ps4_game", "ps4"),
-        ("unknown", "playstation_unknown"),
-        ("ps3_game", "playstation_unknown"),
+        ("ps5_native_game", PlayStationConsole.PS5),
+        ("ps4_game", PlayStationConsole.PS4),
+        ("unknown", PlayStationConsole.PS_UNKNOWN),
+        ("ps3_game", PlayStationConsole.PS_UNKNOWN),
     ],
 )
 def test_platform_from_category(category, expected):
@@ -184,7 +184,7 @@ def test_map_trophy_title_returns_none_without_mapping(
     assert result is None
 
 
-def test_map_trophy_title_creates_achievement_set(
+def test_map_trophy_title_creates_achievements(
     mapper,
     trophy_title,
 ):
@@ -195,13 +195,7 @@ def test_map_trophy_title_creates_achievement_set(
         account,
     )
 
-    achievement_set, groups, achievements, progress = result
-
-    assert achievement_set.id == "psn-trophy-set:NPWR00001_00"
-    assert achievement_set.game_release_id == "test-game-ps5"
-    assert achievement_set.service_id == Platform.PLAYSTATION
-    assert achievement_set.name == "Test Game"
-    assert achievement_set.external_identifier == "NPWR00001_00"
+    groups, achievements, progress = result
 
     assert len(groups) == 1
     assert len(achievements) == 1
@@ -214,15 +208,14 @@ def test_map_trophy_title_creates_achievement_group(
 ):
     account = mapper._map_account()
 
-    _, groups, _, _ = mapper._map_trophy_title(
+    groups, _, _ = mapper._map_trophy_title(
         trophy_title,
         account,
     )
 
     group = groups[0]
 
-    assert group.id == "psn-trophy-set:NPWR00001_00:default"
-    assert group.achievement_set_id == "psn-trophy-set:NPWR00001_00"
+    assert group.id == "test-game-ps5-achievements-default"
     assert group.external_group_id == "default"
     assert group.name == "Base Game"
 
@@ -233,16 +226,16 @@ def test_map_trophy_title_creates_achievement(
 ):
     account = mapper._map_account()
 
-    _, _, achievements, _ = mapper._map_trophy_title(
+    _, achievements, _ = mapper._map_trophy_title(
         trophy_title,
         account,
     )
 
     achievement = achievements[0]
 
-    assert achievement.id == "psn-trophy-set:NPWR00001_00:1"
-    assert achievement.achievement_set_id == "psn-trophy-set:NPWR00001_00"
-    assert achievement.group_id == "psn-trophy-set:NPWR00001_00:default"
+    assert achievement.id == "test-game-ps5-achievement-1"
+    assert achievement.game_release_id == "test-game-ps5"
+    assert achievement.group_id == "test-game-ps5-achievements-default"
     assert achievement.external_id == "1"
     assert achievement.name == "First Trophy"
     assert achievement.description == "Earn your first trophy"
@@ -259,14 +252,14 @@ def test_map_trophy_title_creates_achievement_progress(
 ):
     account = mapper._map_account()
 
-    _, _, _, progress_records = mapper._map_trophy_title(
+    _, _, progress_records = mapper._map_trophy_title(
         trophy_title,
         account,
     )
 
     progress = progress_records[0]
 
-    assert progress.achievement_id == "psn-trophy-set:NPWR00001_00:1"
+    assert progress.achievement_id == "test-game-ps5-achievement-1"
     assert progress.account_id == account.id
     assert progress.unlocked is True
     assert progress.progress_percentage == 100.0
@@ -285,9 +278,8 @@ def test_map_trophy_titles_skips_unmapped_titles(
 
     account = mapper._map_account()
 
-    sets, groups, achievements, progress = mapper._map_trophy_titles(account)
+    groups, achievements, progress = mapper._map_trophy_titles(account)
 
-    assert len(sets) == 1
     assert len(groups) == 1
     assert len(achievements) == 1
     assert len(progress) == 1
@@ -312,7 +304,6 @@ def test_map_returns_complete_mapped_data(
 
     assert len(result.activities) == 1
 
-    assert len(result.achievement_sets) == 1
     assert len(result.achievement_groups) == 1
     assert len(result.achievements) == 1
     assert len(result.achievement_progress) == 1
