@@ -1,6 +1,6 @@
 import sqlite3
 
-from game_vault.database.connection import get_connection
+from game_vault.databases.connection import get_connection
 
 
 def test_get_connection_returns_sqlite_connection():

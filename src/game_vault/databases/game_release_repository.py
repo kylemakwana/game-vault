@@ -2,7 +2,7 @@
 
 import sqlite3
 
-from game_vault.database.external_identifier_repository import (
+from game_vault.databases.external_identifier_repository import (
     ExternalIdentifierRepository,
 )
 from game_vault.models.game import GameRelease

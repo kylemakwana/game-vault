@@ -1,11 +1,11 @@
 """Provide the service boundary for importing PlayStation snapshots."""
 
-from game_vault.database.external_identifier_repository import (
+from game_vault.databases.external_identifier_repository import (
     ExternalIdentifierRepository,
 )
-from game_vault.database.game_release_repository import GameReleaseRepository
-from game_vault.database.game_repository import GameRepository
-from game_vault.database.source_game_mapping_repository import (
+from game_vault.databases.game_release_repository import GameReleaseRepository
+from game_vault.databases.game_repository import GameRepository
+from game_vault.databases.source_game_mapping_repository import (
     SourceGameMappingRepository,
 )
 from game_vault.mappers.playstation_mapper import (

@@ -1,4 +1,4 @@
-from game_vault.database.game_repository import GameRepository
+from game_vault.databases.game_repository import GameRepository
 from game_vault.models.game import Game
 
 

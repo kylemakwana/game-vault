@@ -3,14 +3,14 @@
 import argparse
 from pathlib import Path
 
-from game_vault.database.connection import get_connection
-from game_vault.database.external_identifier_repository import (
+from game_vault.databases.connection import get_connection
+from game_vault.databases.external_identifier_repository import (
     ExternalIdentifierRepository,
 )
-from game_vault.database.game_release_repository import GameReleaseRepository
-from game_vault.database.game_repository import GameRepository
-from game_vault.database.schema import create_tables, drop_tables
-from game_vault.database.source_game_mapping_repository import (
+from game_vault.databases.game_release_repository import GameReleaseRepository
+from game_vault.databases.game_repository import GameRepository
+from game_vault.databases.schema import create_tables, drop_tables
+from game_vault.databases.source_game_mapping_repository import (
     SourceGameMappingRepository,
 )
 from game_vault.loaders.catalog_loader import load_catalog

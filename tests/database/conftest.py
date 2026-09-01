@@ -1,7 +1,7 @@
 import pytest
 
-from game_vault.database.connection import get_connection
-from game_vault.database.schema import create_tables
+from game_vault.databases.connection import get_connection
+from game_vault.databases.schema import create_tables
 from game_vault.models.game import Game, GameRelease
 from game_vault.models.platform import ExternalIdentifier
 

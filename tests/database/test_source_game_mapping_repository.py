@@ -2,8 +2,8 @@ import sqlite3
 
 import pytest
 
-from game_vault.database.schema import create_tables
-from game_vault.database.source_game_mapping_repository import (
+from game_vault.databases.schema import create_tables
+from game_vault.databases.source_game_mapping_repository import (
     SourceGameMappingRepository,
 )
 from game_vault.models.mapping import SourceGameMapping

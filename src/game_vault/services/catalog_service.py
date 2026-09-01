@@ -1,8 +1,8 @@
 """Coordinate catalog operations across persistence repositories."""
 
-from game_vault.database.game_release_repository import GameReleaseRepository
-from game_vault.database.game_repository import GameRepository
-from game_vault.database.source_game_mapping_repository import (
+from game_vault.databases.game_release_repository import GameReleaseRepository
+from game_vault.databases.game_repository import GameRepository
+from game_vault.databases.source_game_mapping_repository import (
     SourceGameMappingRepository,
 )
 from game_vault.models.game import Game, GameRelease

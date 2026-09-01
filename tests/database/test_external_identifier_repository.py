@@ -1,4 +1,4 @@
-from game_vault.database.external_identifier_repository import (
+from game_vault.databases.external_identifier_repository import (
     ExternalIdentifierRepository,
 )
 

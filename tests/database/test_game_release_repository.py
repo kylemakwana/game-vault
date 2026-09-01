@@ -2,10 +2,10 @@ import sqlite3
 
 import pytest
 
-from game_vault.database.game_release_repository import (
+from game_vault.databases.game_release_repository import (
     GameReleaseRepository,
 )
-from game_vault.database.game_repository import GameRepository
+from game_vault.databases.game_repository import GameRepository
 from game_vault.models.game import GameRelease
 
 

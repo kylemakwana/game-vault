@@ -2,7 +2,7 @@ import sqlite3
 
 import pytest
 
-from game_vault.database.schema import (
+from game_vault.databases.schema import (
     create_tables,
     drop_tables,
 )
