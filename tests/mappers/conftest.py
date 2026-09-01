@@ -3,7 +3,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from game_vault.mappers.playstation_mapper import PlaystationMapper
+from game_vault.mappers.playstation_mapper import PlayStationMapper
 
 
 @pytest.fixture
@@ -154,7 +154,7 @@ def mapper(
     game_series,
     series_membership,
 ):
-    return PlaystationMapper(
+    return PlayStationMapper(
         snapshot=snapshot,
         mappings=[title_mapping, trophy_mapping],
         releases=[release, unrelated_release],

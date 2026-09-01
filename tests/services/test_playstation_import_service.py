@@ -1,5 +1,3 @@
-from unittest.mock import Mock
-
 import pytest
 
 from game_vault.database.connection import get_connection
@@ -12,11 +10,10 @@ from game_vault.database.schema import create_tables
 from game_vault.database.source_game_mapping_repository import (
     SourceGameMappingRepository,
 )
-from game_vault.mappers.playstation_mapper import PlaystationMappedData
+from game_vault.mappers.playstation_mapper import PlayStationMappedData
 from game_vault.models.game import Game, GameRelease
 from game_vault.models.mapping import SourceGameMapping
 from game_vault.models.platform import ExternalIdentifier
-from game_vault.services import playstation_import_service
 from game_vault.services.playstation_import_service import PlaystationImportService
 
 
@@ -110,29 +107,15 @@ def mapped_data(
     mapped_game,
     mapped_release,
     mapped_mapping,
-) -> PlaystationMappedData:
-    return PlaystationMappedData(
+) -> PlayStationMappedData:
+    return PlayStationMappedData(
         games=[mapped_game],
         releases=[mapped_release],
         mappings=[mapped_mapping],
     )
 
 
-def patch_mapper(monkeypatch, mapped_data):
-    mapper = Mock()
-    mapper.map.return_value = mapped_data
-    mapper_class = Mock(return_value=mapper)
-    monkeypatch.setattr(
-        playstation_import_service,
-        "PlaystationMapper",
-        mapper_class,
-    )
-
-    return mapper_class
-
-
-def test_importing_mapped_snapshot_persists_catalogue_records(
-    monkeypatch,
+def test_importing_mapped_data_persists_catalogue_records(
     import_service,
     game_repository,
     game_release_repository,
@@ -144,10 +127,7 @@ def test_importing_mapped_snapshot_persists_catalogue_records(
     mapped_identifier,
     mapped_mapping,
 ):
-    patch_mapper(monkeypatch, mapped_data)
-    snapshot = Mock()
-
-    import_service.import_snapshot(snapshot)
+    import_service.import_data(mapped_data)
 
     assert game_repository.get(mapped_game.id) == mapped_game
     assert game_release_repository.get(mapped_release.id) == mapped_release
@@ -163,39 +143,53 @@ def test_importing_mapped_snapshot_persists_catalogue_records(
     )
 
 
-def test_import_passes_existing_catalogue_state_to_mapper(
-    monkeypatch,
+def test_importing_mapped_data_upserts_existing_catalogue_records(
+    connection,
     import_service,
     game_repository,
     game_release_repository,
     source_game_mapping_repository,
+    mapped_data,
     mapped_game,
     mapped_release,
     mapped_mapping,
 ):
-    game_repository.upsert(mapped_game)
-    game_release_repository.upsert(mapped_release)
-    source_game_mapping_repository.upsert(mapped_mapping)
-    mapper_class = patch_mapper(
-        monkeypatch,
-        PlaystationMappedData(games=[]),
+    existing_game = mapped_game.model_copy(update={"name": "Old Minecraft"})
+    existing_release = mapped_release.model_copy(
+        update={
+            "name": "Old Minecraft Release",
+            "external_identifiers": [],
+        }
     )
-    snapshot = Mock()
+    existing_mapping = mapped_mapping.model_copy(
+        update={
+            "match_method": "manual",
+            "confidence": 0.5,
+        }
+    )
+    game_repository.upsert(existing_game)
+    game_release_repository.upsert(existing_release)
+    source_game_mapping_repository.upsert(existing_mapping)
 
-    import_service.import_snapshot(snapshot)
+    import_service.import_data(mapped_data)
 
-    mapper_class.assert_called_once_with(
-        snapshot=snapshot,
-        mappings=[mapped_mapping],
-        releases=[mapped_release],
-        games=[mapped_game],
-        series=[],
-        series_memberships=[],
+    assert game_repository.get(mapped_game.id) == mapped_game
+    assert game_release_repository.get(mapped_release.id) == mapped_release
+    assert (
+        source_game_mapping_repository.get(
+            mapped_mapping.source,
+            mapped_mapping.source_id,
+        )
+        == mapped_mapping
     )
 
+    for table in ("game", "game_release", "source_game_mapping"):
+        count = connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
 
-def test_importing_same_snapshot_twice_is_idempotent(
-    monkeypatch,
+        assert count == 1
+
+
+def test_importing_same_mapped_data_twice_is_idempotent(
     connection,
     import_service,
     game_repository,
@@ -203,17 +197,14 @@ def test_importing_same_snapshot_twice_is_idempotent(
     source_game_mapping_repository,
     mapped_data,
 ):
-    patch_mapper(monkeypatch, mapped_data)
-    snapshot = Mock()
-
-    import_service.import_snapshot(snapshot)
+    import_service.import_data(mapped_data)
     state_after_first_import = (
         game_repository.get_all(),
         game_release_repository.get_all(),
         source_game_mapping_repository.get_all(),
     )
 
-    import_service.import_snapshot(snapshot)
+    import_service.import_data(mapped_data)
     state_after_second_import = (
         game_repository.get_all(),
         game_release_repository.get_all(),

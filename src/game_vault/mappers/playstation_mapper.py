@@ -21,7 +21,7 @@ from game_vault.models.series import GameSeries, GameSeriesMembership
 
 
 @dataclass
-class PlaystationMappedData:
+class PlayStationMappedData:
     """Collect all domain records produced from a PlayStation snapshot."""
 
     games: list[Game]
@@ -41,7 +41,7 @@ class PlaystationMappedData:
     account: PlatformAccount | None = None
 
 
-class PlaystationMapper:
+class PlayStationMapper:
     """Map a PlayStation snapshot against the curated Game Vault catalog."""
 
     def __init__(
@@ -356,7 +356,7 @@ class PlaystationMapper:
             progress_records,
         )
 
-    def map(self) -> PlaystationMappedData:
+    def map(self) -> PlayStationMappedData:
         """Map the snapshot into all supported Game Vault domain records.
 
         :return: Aggregated mapped PlayStation data.
@@ -374,7 +374,7 @@ class PlaystationMapper:
             self._map_trophy_titles(account)
         )
 
-        return PlaystationMappedData(
+        return PlayStationMappedData(
             account=account,
             games=games,
             releases=releases,

@@ -9,14 +9,12 @@ from game_vault.database.source_game_mapping_repository import (
     SourceGameMappingRepository,
 )
 from game_vault.mappers.playstation_mapper import (
-    PlaystationMappedData,
-    PlaystationMapper,
+    PlayStationMappedData,
 )
-from game_vault.models.playstation import PlayStationSnapshot
 
 
 class PlaystationImportService:
-    """Coordinate mapping and persistence of PlayStation snapshot data."""
+    """Persist mapped PlayStation data into Game Vault."""
 
     def __init__(
         self,
@@ -25,44 +23,40 @@ class PlaystationImportService:
         external_identifier_repository: ExternalIdentifierRepository,
         source_game_mapping_repository: SourceGameMappingRepository,
     ):
-        """Initialize the PlayStation import service."""
         self.game_repository = game_repository
         self.game_release_repository = game_release_repository
         self.external_identifier_repository = external_identifier_repository
         self.source_game_mapping_repository = source_game_mapping_repository
 
-    def import_snapshot(self, snapshot: PlayStationSnapshot) -> None:
-        """Import a PlayStation snapshot into Game Vault.
-
-        :param snapshot: Normalized PlayStation snapshot to import.
-        """
-        existing_releases = self.game_release_repository.get_all()
-        existing_games = self.game_repository.get_all()
-        existing_mappings = self.source_game_mapping_repository.get_all()
-
-        mapper = PlaystationMapper(
-            snapshot=snapshot,
-            mappings=existing_mappings,
-            releases=existing_releases,
-            games=existing_games,
-            # Series persistence is not part of the initial import slice.
-            series=[],
-            series_memberships=[],
-        )
-
-        mapped_data: PlaystationMappedData = mapper.map()
-
+    def import_data(self, mapped_data: PlayStationMappedData) -> None:
+        """Import mapped PlayStation data into Game Vault."""
+        print("Importing mapped PlayStation data...\n")
+        print(f"Importing {len(mapped_data.games)} mapped games...")
         for game in mapped_data.games:
             self.game_repository.upsert(game)
+
+        print("Games imported!\n")
+        print(f"Importing {len(mapped_data.releases)} mapped releases...")
 
         for release in mapped_data.releases:
             self.game_release_repository.upsert(release)
 
+            print(
+                f"Importing {len(release.external_identifiers)} external identifiers "
+                f"for {release.name}..."
+            )
             for external_identifier in release.external_identifiers:
                 self.external_identifier_repository.insert(
                     game_release_id=release.id,
                     external_identifier=external_identifier,
                 )
+            print(f"Imported external identifiers for {release.name}\n")
+
+        print("Releases and external identifiers imported!\n")
+        print(f"Importing {len(mapped_data.mappings)} source game mappings...")
 
         for mapping in mapped_data.mappings:
             self.source_game_mapping_repository.upsert(mapping)
+
+        print("Mappings imported!\n")
+        print("Import successful! All PlayStation data imported!\n")

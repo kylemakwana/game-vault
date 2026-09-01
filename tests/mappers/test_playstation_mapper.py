@@ -160,9 +160,9 @@ def test_map_played_titles_ignores_mapping_without_release(
     ],
 )
 def test_platform_from_category(category, expected):
-    from game_vault.mappers.playstation_mapper import PlaystationMapper
+    from game_vault.mappers.playstation_mapper import PlayStationMapper
 
-    result = PlaystationMapper._platform_from_category(category)
+    result = PlayStationMapper._platform_from_category(category)
 
     assert result == expected
 

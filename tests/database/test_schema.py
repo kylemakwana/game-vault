@@ -64,8 +64,8 @@ def test_game_table_has_expected_required_columns(
     assert columns["id"]["pk"] == 1
 
     assert columns["name"]["notnull"] == 1
-    assert columns["sort_name"]["notnull"] == 1
 
+    assert columns["sort_name"]["notnull"] == 0
     assert columns["release_date"]["notnull"] == 0
     assert columns["developer"]["notnull"] == 0
     assert columns["publisher"]["notnull"] == 0

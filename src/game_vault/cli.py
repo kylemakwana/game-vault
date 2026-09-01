@@ -2,12 +2,24 @@
 
 import argparse
 from pathlib import Path
-from pprint import pprint
 
+from game_vault.database.connection import get_connection
+from game_vault.database.external_identifier_repository import (
+    ExternalIdentifierRepository,
+)
+from game_vault.database.game_release_repository import GameReleaseRepository
+from game_vault.database.game_repository import GameRepository
+from game_vault.database.schema import create_tables, drop_tables
+from game_vault.database.source_game_mapping_repository import (
+    SourceGameMappingRepository,
+)
 from game_vault.loaders.catalog_loader import load_catalog
+from game_vault.mappers.playstation_mapper import PlayStationMappedData
 from game_vault.models.game import Game, GameRelease
 from game_vault.models.mapping import SourceGameMapping
+from game_vault.models.playstation import PlayStationSnapshot
 from game_vault.models.series import GameSeries, GameSeriesMembership
+from game_vault.services.playstation_import_service import PlaystationImportService
 
 
 def main() -> None:
@@ -57,6 +69,11 @@ def main() -> None:
         help="Map the cached PlayStation snapshot to Game Vault format",
     )
 
+    psn_subparsers.add_parser(
+        "import",
+        help="Import the PlayStation data",
+    )
+
     args = parser.parse_args()
 
     if args.platform == "psn":
@@ -84,6 +101,9 @@ def handle_psn_command(command: str) -> None:
     elif command == "map":
         map_playstation_snapshot()
 
+    elif command == "import":
+        import_playstation()
+
 
 def collect_playstation_data() -> None:
     """Collect PlayStation account data and cache it locally."""
@@ -98,7 +118,7 @@ def collect_playstation_data() -> None:
     collector.collect_all()
 
 
-def build_playstation_snapshot() -> None:
+def build_playstation_snapshot(write_output: bool = True) -> PlayStationSnapshot:
     """Build and write a normalized PlayStation snapshot from cached data."""
     from pathlib import Path
 
@@ -108,19 +128,23 @@ def build_playstation_snapshot() -> None:
 
     builder = PlayStationSnapshotBuilder()
     snapshot = builder.build()
-    output_path = Path("data/playstation/snapshot.json")
 
-    output_path.parent.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
+    if write_output:
+        output_path = Path("data/playstation/snapshot.json")
 
-    output_path.write_text(
-        snapshot.model_dump_json(indent=4),
-        encoding="utf-8",
-    )
+        output_path.parent.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
 
-    print(f"Snapshot written to {output_path}")
+        output_path.write_text(
+            snapshot.model_dump_json(indent=4),
+            encoding="utf-8",
+        )
+
+        print(f"Snapshot written to {output_path}")
+
+    return snapshot
 
 
 def validate_playstation_snapshot() -> None:
@@ -145,10 +169,12 @@ def validate_playstation_snapshot() -> None:
     print(f"Warnings: {validation.warnings}")
 
 
-def map_playstation_snapshot() -> None:
+def map_playstation_snapshot(
+    snapshot: PlayStationSnapshot | None = None,
+) -> PlayStationMappedData:
     """Map the cached PlayStation snapshot into Game Vault domain records."""
     from game_vault.mappers.playstation_mapper import (
-        PlaystationMapper,
+        PlayStationMapper,
     )
     from game_vault.services.playstation_snapshot_builder import (
         PlayStationSnapshotBuilder,
@@ -164,10 +190,11 @@ def map_playstation_snapshot() -> None:
         Path("resources/catalog/series_memberships.json"), GameSeriesMembership
     )
 
-    builder = PlayStationSnapshotBuilder()
-    snapshot = builder.build()
+    if not snapshot:
+        builder = PlayStationSnapshotBuilder()
+        snapshot = builder.build()
 
-    mapper = PlaystationMapper(
+    mapper = PlayStationMapper(
         snapshot=snapshot,
         mappings=mappings,
         games=games,
@@ -176,5 +203,31 @@ def map_playstation_snapshot() -> None:
         series_memberships=series_memberships,
     )
 
-    mapped_data = mapper.map()
-    pprint(mapped_data)
+    return mapper.map()
+
+
+def import_playstation() -> None:
+    """Run the PlayStation import workflow."""
+    playstation_snapshot = build_playstation_snapshot()
+
+    mapped_data = map_playstation_snapshot(
+        snapshot=playstation_snapshot,
+    )
+
+    with get_connection() as connection:
+        drop_tables(connection)
+        create_tables(connection)
+
+        game_repository = GameRepository(connection)
+        game_release_repository = GameReleaseRepository(connection)
+        external_identifier_repository = ExternalIdentifierRepository(connection)
+        source_game_mapping_repository = SourceGameMappingRepository(connection)
+
+        playstation_import_service = PlaystationImportService(
+            game_repository=game_repository,
+            game_release_repository=game_release_repository,
+            external_identifier_repository=external_identifier_repository,
+            source_game_mapping_repository=source_game_mapping_repository,
+        )
+
+        playstation_import_service.import_data(mapped_data)

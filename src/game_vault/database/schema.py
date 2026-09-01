@@ -12,10 +12,10 @@ def create_tables(connection: sqlite3.Connection) -> None:
     """
     connection.execute(
         """
-        CREATE TABLE game (
+        CREATE TABLE IF NOT EXISTS game (
             id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
-            sort_name TEXT NOT NULL,
+            sort_name TEXT,
             release_date TEXT,
             developer TEXT,
             publisher TEXT,
@@ -27,7 +27,7 @@ def create_tables(connection: sqlite3.Connection) -> None:
 
     connection.execute(
         """
-        CREATE TABLE game_release (
+        CREATE TABLE IF NOT EXISTS game_release (
             id TEXT PRIMARY KEY,
             game_id TEXT NOT NULL,
             platform_id TEXT NOT NULL,
@@ -44,7 +44,7 @@ def create_tables(connection: sqlite3.Connection) -> None:
 
     connection.execute(
         """
-        CREATE TABLE external_identifier (
+        CREATE TABLE IF NOT EXISTS external_identifier (
             game_release_id TEXT NOT NULL,
             service TEXT NOT NULL,
             identifier_type TEXT NOT NULL,
@@ -66,7 +66,7 @@ def create_tables(connection: sqlite3.Connection) -> None:
 
     connection.execute(
         """
-        CREATE TABLE source_game_mapping
+        CREATE TABLE IF NOT EXISTS source_game_mapping
         (
             source          TEXT NOT NULL,
             source_id       TEXT NOT NULL,

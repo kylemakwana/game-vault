@@ -144,7 +144,7 @@ def test_validate_playstation_snapshot_prints_validation_result(
     ]
 
 
-def test_map_playstation_snapshot_loads_catalog_and_prints_mapped_data(
+def test_map_playstation_snapshot_loads_catalog_and_returns_mapped_data(
     monkeypatch,
 ):
     from game_vault.mappers import playstation_mapper
@@ -181,13 +181,10 @@ def test_map_playstation_snapshot_loads_catalog_and_prints_mapped_data(
     mapper_class = Mock(return_value=mapper)
     monkeypatch.setattr(
         playstation_mapper,
-        "PlaystationMapper",
+        "PlayStationMapper",
         mapper_class,
     )
-    pprint = Mock()
-    monkeypatch.setattr(cli, "pprint", pprint)
-
-    cli.map_playstation_snapshot()
+    result = cli.map_playstation_snapshot()
 
     assert load_catalog.call_args_list == [
         call(Path("resources/mappings/playstation.json"), SourceGameMapping),
@@ -208,4 +205,4 @@ def test_map_playstation_snapshot_loads_catalog_and_prints_mapped_data(
         series_memberships=series_memberships,
     )
     mapper.map.assert_called_once_with()
-    pprint.assert_called_once_with(mapped_data)
+    assert result == mapped_data
