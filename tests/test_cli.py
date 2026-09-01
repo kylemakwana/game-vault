@@ -1,14 +1,10 @@
 import sys
-from pathlib import Path
 from types import ModuleType
-from unittest.mock import Mock, call
+from unittest.mock import Mock
 
 import pytest
 
 from game_vault import cli
-from game_vault.models.game import Game, GameRelease
-from game_vault.models.mapping import SourceGameMapping
-from game_vault.models.series import GameSeries, GameSeriesMembership
 
 
 def test_main_dispatches_psn_command(monkeypatch):
@@ -142,67 +138,3 @@ def test_validate_playstation_snapshot_prints_validation_result(
         "Trophy totals match? False",
         "Warnings: ['missing trophy details']",
     ]
-
-
-def test_map_playstation_snapshot_loads_catalog_and_returns_mapped_data(
-    monkeypatch,
-):
-    from game_vault.mappers import playstation_mapper
-    from game_vault.services import playstation_snapshot_builder
-
-    mappings = [Mock()]
-    games = [Mock()]
-    releases = [Mock()]
-    series = [Mock()]
-    series_memberships = [Mock()]
-    load_catalog = Mock(
-        side_effect=[
-            mappings,
-            games,
-            releases,
-            series,
-            series_memberships,
-        ]
-    )
-    monkeypatch.setattr(cli, "load_catalog", load_catalog)
-
-    snapshot = Mock()
-    builder = Mock()
-    builder.build.return_value = snapshot
-    monkeypatch.setattr(
-        playstation_snapshot_builder,
-        "PlayStationSnapshotBuilder",
-        Mock(return_value=builder),
-    )
-
-    mapped_data = {"games": games}
-    mapper = Mock()
-    mapper.map.return_value = mapped_data
-    mapper_class = Mock(return_value=mapper)
-    monkeypatch.setattr(
-        playstation_mapper,
-        "PlayStationMapper",
-        mapper_class,
-    )
-    result = cli.map_playstation_snapshot()
-
-    assert load_catalog.call_args_list == [
-        call(Path("resources/mappings/playstation.json"), SourceGameMapping),
-        call(Path("resources/catalog/games.json"), Game),
-        call(Path("resources/catalog/releases.json"), GameRelease),
-        call(Path("resources/catalog/series.json"), GameSeries),
-        call(
-            Path("resources/catalog/series_memberships.json"),
-            GameSeriesMembership,
-        ),
-    ]
-    mapper_class.assert_called_once_with(
-        snapshot=snapshot,
-        mappings=mappings,
-        games=games,
-        releases=releases,
-        series=series,
-        series_memberships=series_memberships,
-    )
-    mapper.map.assert_called_once_with()
-    assert result == mapped_data

@@ -1,8 +1,9 @@
 """Create authenticated PlayStation Network API clients."""
 
-from config import PSN_NPSSO
 from dotenv import load_dotenv
 from psnawp_api import PSNAWP
+
+from game_vault.config import PSN_NPSSO
 
 
 def create_psn_client():

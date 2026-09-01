@@ -128,6 +128,7 @@ def build_playstation_snapshot(write_output: bool = True) -> PlayStationSnapshot
 
     builder = PlayStationSnapshotBuilder()
     snapshot = builder.build()
+    builder.validate()
 
     if write_output:
         output_path = Path("data/playstation/snapshot.json")
@@ -142,7 +143,7 @@ def build_playstation_snapshot(write_output: bool = True) -> PlayStationSnapshot
             encoding="utf-8",
         )
 
-        print(f"Snapshot written to {output_path}")
+        print(f"Snapshot written to {output_path.as_posix()}")
 
     return snapshot
 

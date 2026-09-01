@@ -16,6 +16,7 @@ class PlayStationCollector:
         self,
         client: Client,
         raw_dir: Path = Path("data/playstation/raw"),
+        force: bool = False,
     ) -> None:
         """Initialize the collector and create its cache directories.
 
@@ -25,6 +26,7 @@ class PlayStationCollector:
         self.client = client
         self.raw_dir = raw_dir
         self.trophy_dir = self.raw_dir / "trophies"
+        self.force = force
 
         self.raw_dir.mkdir(parents=True, exist_ok=True)
         self.trophy_dir.mkdir(parents=True, exist_ok=True)
@@ -79,42 +81,54 @@ class PlayStationCollector:
 
     def collect_profile(self) -> None:
         """Collect and cache the legacy account profile."""
+        output_path = self.raw_dir / "profile.json"
+
+        if output_path.exists() and not self.force:
+            print("Skipping profile - already cached")
+            return
+
         profile = self.client.get_profile_legacy()
 
-        self._write_json(
-            self.raw_dir / "profile.json",
-            profile,
-        )
+        self._write_json(output_path, profile)
 
     def collect_devices(self) -> None:
         """Collect and cache devices associated with the account."""
+        output_path = self.raw_dir / "devices.json"
+
+        if output_path.exists() and not self.force:
+            print("Skipping devices - already cached")
+            return
+
         devices = self.client.get_account_devices()
 
-        self._write_json(
-            self.raw_dir / "devices.json",
-            devices,
-        )
+        self._write_json(output_path, devices)
 
     def collect_played_titles(self) -> None:
         """Collect and cache the account's played-title history."""
+        output_path = self.raw_dir / "played_titles.json"
+
+        if output_path.exists() and not self.force:
+            print("Skipping played titles - already cached")
+            return
+
         titles = list(self.client.title_stats())
 
-        self._write_json(
-            self.raw_dir / "played_titles.json",
-            self.to_jsonable(titles),
-        )
+        self._write_json(output_path, self.to_jsonable(titles))
 
     def collect_trophy_titles(self) -> list:
         """Collect and cache the account's trophy-title summaries.
 
         :return: Trophy-title objects returned by the PlayStation API.
         """
+        output_path = self.raw_dir / "trophy_titles.json"
+
+        if output_path.exists() and not self.force:
+            print("Skipping trophy titles - already cached")
+            return []
+
         titles = list(self.client.trophy_titles())
 
-        self._write_json(
-            self.raw_dir / "trophy_titles.json",
-            self.to_jsonable(titles),
-        )
+        self._write_json(output_path, self.to_jsonable(titles))
 
         return titles
 
@@ -176,11 +190,10 @@ class PlayStationCollector:
                     trophy_title,
                     force=force,
                 )
+                time.sleep(0.5)
             except Exception as exc:
                 print(f"Failed to collect {trophy_title.title_name}: {exc}")
                 continue
-
-            time.sleep(0.5)
 
     def collect_all(self) -> None:
         """Collect and cache every supported PlayStation account dataset."""
