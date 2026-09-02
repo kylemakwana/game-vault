@@ -83,7 +83,6 @@ def test_map_played_titles(mapper):
 
     activity = result[0]
 
-    assert activity.id == "ps-activity:CUSA00001"
     assert activity.account_id == account.id
     assert activity.game_release_id == "test-game-ps5"
     assert activity.playtime_seconds == 7200

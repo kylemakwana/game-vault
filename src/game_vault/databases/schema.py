@@ -78,11 +78,12 @@ def create_tables(connection: sqlite3.Connection) -> None:
                          source,
                          source_id
                 ),
-
+            
             FOREIGN KEY (game_release_id)
                 REFERENCES game_release(id)
                 ON DELETE CASCADE
         )
+
         """
     )
 
@@ -156,7 +157,6 @@ def create_tables(connection: sqlite3.Connection) -> None:
     connection.execute(
         """
         CREATE TABLE IF NOT EXISTS play_activity (
-            id TEXT NOT NULL,
             account_id TEXT NOT NULL,
             game_release_id TEXT NOT NULL,
             playtime_seconds INTEGER,
@@ -166,6 +166,14 @@ def create_tables(connection: sqlite3.Connection) -> None:
             source TEXT NOT NULL,
             
             PRIMARY KEY (account_id, game_release_id),
+            
+            CHECK (playtime_seconds IS NULL OR playtime_seconds >= 0),
+            CHECK (play_count IS NULL OR play_count >= 0),
+            CHECK (
+                first_played_at IS NULL
+                OR last_played_at IS NULL
+                OR first_played_at <= last_played_at
+            ),
                 
             FOREIGN KEY (game_release_id)
             REFERENCES game_release(id)

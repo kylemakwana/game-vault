@@ -27,8 +27,7 @@ class PlayActivityRepository:
         """
         row = self.connection.execute(
             """
-            SELECT id,
-            account_id,
+            SELECT account_id,
             game_release_id,
             playtime_seconds,
             play_count,
@@ -57,8 +56,7 @@ class PlayActivityRepository:
         """
         rows = self.connection.execute(
             """
-            SELECT id,
-            account_id,
+            SELECT account_id,
             game_release_id,
             playtime_seconds,
             play_count,
@@ -81,15 +79,14 @@ class PlayActivityRepository:
         """
         self.connection.execute(
             """
-            INSERT INTO play_activity (id,
-                                       account_id,
+            INSERT INTO play_activity (account_id,
                                        game_release_id,
                                        playtime_seconds,
                                        play_count,
                                        first_played_at,
                                        last_played_at,
                                        source)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (account_id, game_release_id) DO
+            VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (account_id, game_release_id) DO
             UPDATE SET
                 playtime_seconds = EXCLUDED.playtime_seconds,
                 play_count = EXCLUDED.play_count,
@@ -98,7 +95,6 @@ class PlayActivityRepository:
                 source = EXCLUDED.source
             """,
             (
-                play_activity.id,
                 play_activity.account_id,
                 play_activity.game_release_id,
                 play_activity.playtime_seconds,

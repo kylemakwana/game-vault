@@ -193,7 +193,6 @@ class PlayStationMapper:
 
             activities.append(
                 PlayActivity(
-                    id=f"ps-activity:{title.title_id}",
                     account_id=account.id,
                     game_release_id=release.id,
                     playtime_seconds=title.play_duration_seconds,
