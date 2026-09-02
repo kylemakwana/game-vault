@@ -17,7 +17,7 @@ def test_load_catalog(tmp_path):
         {"id": "witcher-3", "name": "The Witcher 3"},
     ]
 
-    catalog_path = tmp_path / "catalog.json"
+    catalog_path = tmp_path / "catalogue.json"
     catalog_path.write_text(json.dumps(data), encoding="utf-8")
 
     result = load_catalog(catalog_path, DummyModel)
@@ -29,7 +29,7 @@ def test_load_catalog(tmp_path):
 
 
 def test_load_catalog_returns_empty_list_for_empty_catalog(tmp_path):
-    catalog_path = tmp_path / "catalog.json"
+    catalog_path = tmp_path / "catalogue.json"
     catalog_path.write_text("[]", encoding="utf-8")
 
     result = load_catalog(catalog_path, DummyModel)
@@ -42,7 +42,7 @@ def test_load_catalog_raises_validation_error_for_invalid_data(tmp_path):
         {"id": "minecraft"},
     ]
 
-    catalog_path = tmp_path / "catalog.json"
+    catalog_path = tmp_path / "catalogue.json"
     catalog_path.write_text(json.dumps(data), encoding="utf-8")
 
     with pytest.raises(ValidationError):

@@ -1,4 +1,4 @@
-"""Coordinate catalog operations across persistence repositories."""
+"""Coordinate catalogue operations across persistence repositories."""
 
 from game_vault.databases.game_release_repository import GameReleaseRepository
 from game_vault.databases.game_repository import GameRepository
@@ -18,7 +18,7 @@ class CatalogService:
         game_release_repository: GameReleaseRepository,
         source_game_mapping_repository: SourceGameMappingRepository,
     ) -> None:
-        """Initialize the catalog service.
+        """Initialize the catalogue service.
 
         :param game_repository: Repository used to persist games.
         :param game_release_repository: Repository used to persist releases.
@@ -69,7 +69,7 @@ class CatalogService:
         return self.game_release_repository.get_by_game_id(game_id)
 
     def delete_game(self, game_id: str) -> bool:
-        """Delete a game and its dependent catalog records.
+        """Delete a game and its dependent catalogue records.
 
         :param game_id: Catalog game identifier.
         :return: ``True`` when the game existed, otherwise ``False``.

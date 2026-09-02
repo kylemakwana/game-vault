@@ -3,12 +3,18 @@
 import argparse
 from pathlib import Path
 
+from game_vault.databases.achievement_group_repository import AchievementGroupRepository
+from game_vault.databases.achievement_progress_repository import (
+    AchievementProgressRepository,
+)
+from game_vault.databases.achievement_repository import AchievementRepository
 from game_vault.databases.connection import get_connection
 from game_vault.databases.external_identifier_repository import (
     ExternalIdentifierRepository,
 )
 from game_vault.databases.game_release_repository import GameReleaseRepository
 from game_vault.databases.game_repository import GameRepository
+from game_vault.databases.play_activity_repository import PlayActivityRepository
 from game_vault.databases.schema import create_tables, drop_tables
 from game_vault.databases.source_game_mapping_repository import (
     SourceGameMappingRepository,
@@ -184,11 +190,11 @@ def map_playstation_snapshot(
     mappings = load_catalog(
         Path("resources/mappings/playstation.json"), SourceGameMapping
     )
-    games = load_catalog(Path("resources/catalog/games.json"), Game)
-    releases = load_catalog(Path("resources/catalog/releases.json"), GameRelease)
-    series = load_catalog(Path("resources/catalog/series.json"), GameSeries)
+    games = load_catalog(Path("resources/catalogue/games.json"), Game)
+    releases = load_catalog(Path("resources/catalogue/releases.json"), GameRelease)
+    series = load_catalog(Path("resources/catalogue/series.json"), GameSeries)
     series_memberships = load_catalog(
-        Path("resources/catalog/series_memberships.json"), GameSeriesMembership
+        Path("resources/catalogue/series_memberships.json"), GameSeriesMembership
     )
 
     if not snapshot:
@@ -223,12 +229,20 @@ def import_playstation() -> None:
         game_release_repository = GameReleaseRepository(connection)
         external_identifier_repository = ExternalIdentifierRepository(connection)
         source_game_mapping_repository = SourceGameMappingRepository(connection)
+        achievement_repository = AchievementRepository(connection)
+        achievement_group_repository = AchievementGroupRepository(connection)
+        achievement_progress_repository = AchievementProgressRepository(connection)
+        play_activity_repository = PlayActivityRepository(connection)
 
         playstation_import_service = PlaystationImportService(
             game_repository=game_repository,
             game_release_repository=game_release_repository,
             external_identifier_repository=external_identifier_repository,
             source_game_mapping_repository=source_game_mapping_repository,
+            achievement_repository=achievement_repository,
+            achievement_group_repository=achievement_group_repository,
+            achievement_progress_repository=achievement_progress_repository,
+            play_activity_repository=play_activity_repository,
         )
 
         playstation_import_service.import_data(mapped_data)

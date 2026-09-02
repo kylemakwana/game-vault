@@ -9,7 +9,7 @@ class GameRepository:
     """Provide persistence operations for :class:`~game_vault.models.game.Game`."""
 
     def __init__(self, connection: sqlite3.Connection):
-        """Initialize the repository.
+        """Initialise the repository.
 
         :param connection: Open SQLite connection containing the Game Vault schema.
         """
@@ -33,7 +33,7 @@ class GameRepository:
     def get(self, game_id: str) -> Game | None:
         """Return a game by identifier.
 
-        :param game_id: Catalog game identifier.
+        :param game_id: Catalogue game identifier.
         :return: Matching game, or ``None`` when it does not exist.
         """
         row = self.connection.execute(
@@ -127,11 +127,7 @@ class GameRepository:
         :return: ``True`` when a row was deleted, otherwise ``False``.
         """
         cursor = self.connection.execute(
-            """
-            DELETE
-            FROM game
-            WHERE id = ?
-            """,
+            """DELETE FROM game WHERE id = ?""",
             (game_id,),
         )
 

@@ -13,7 +13,7 @@ def create_tables(connection: sqlite3.Connection) -> None:
     connection.execute(
         """
         CREATE TABLE IF NOT EXISTS game (
-            id TEXT PRIMARY KEY,
+            id TEXT NOT NULL PRIMARY KEY,
             name TEXT NOT NULL,
             sort_name TEXT,
             release_date TEXT,
@@ -28,7 +28,7 @@ def create_tables(connection: sqlite3.Connection) -> None:
     connection.execute(
         """
         CREATE TABLE IF NOT EXISTS game_release (
-            id TEXT PRIMARY KEY,
+            id TEXT NOT NULL PRIMARY KEY,
             game_id TEXT NOT NULL,
             platform_id TEXT NOT NULL,
             name TEXT NOT NULL,
@@ -86,6 +86,94 @@ def create_tables(connection: sqlite3.Connection) -> None:
         """
     )
 
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS achievement_group (
+            id TEXT NOT NULL PRIMARY KEY,
+            game_release_id TEXT NOT NULL,
+            external_group_id TEXT NOT NULL,
+            name TEXT,
+            
+            UNIQUE (game_release_id, external_group_id),
+            
+            FOREIGN KEY (game_release_id)
+            REFERENCES game_release(id)
+            ON DELETE CASCADE
+        )
+        """
+    )
+
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS achievement 
+        (
+            id TEXT NOT NULL PRIMARY KEY,
+            game_release_id TEXT NOT NULL,
+            group_id TEXT NOT NULL,
+            external_id  TEXT NOT NULL,
+            name TEXT NOT NULL,
+            description TEXT,
+            icon_url TEXT,
+            hidden BOOLEAN,
+            achievement_type TEXT,
+            rarity TEXT,
+            global_unlock_percentage REAL,
+            progress_target REAL,
+            
+            UNIQUE (game_release_id, external_id),
+            
+            FOREIGN KEY (game_release_id)
+            REFERENCES game_release(id)
+            ON DELETE CASCADE,
+            
+            FOREIGN KEY (group_id)
+            REFERENCES achievement_group(id)
+            ON DELETE CASCADE
+        )
+        """
+    )
+
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS achievement_progress (
+            achievement_id TEXT NOT NULL,
+            account_id TEXT NOT NULL,
+            unlocked BOOLEAN NOT NULL,
+            unlocked_at DATETIME,
+            progress REAL,
+            progress_percentage REAL,
+            progressed_at DATETIME,
+            
+            PRIMARY KEY (achievement_id, account_id),
+            
+            FOREIGN KEY (achievement_id)
+            REFERENCES achievement(id)
+            ON DELETE CASCADE
+        )
+        """
+    )
+
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS play_activity (
+            id TEXT NOT NULL,
+            account_id TEXT NOT NULL,
+            game_release_id TEXT NOT NULL,
+            playtime_seconds INTEGER,
+            play_count INTEGER,
+            first_played_at DATETIME,
+            last_played_at DATETIME,
+            source TEXT NOT NULL,
+            
+            PRIMARY KEY (account_id, game_release_id),
+                
+            FOREIGN KEY (game_release_id)
+            REFERENCES game_release(id)
+            ON DELETE CASCADE
+        )
+        """
+    )
+
 
 def drop_tables(connection: sqlite3.Connection) -> None:
     """Drop all Game Vault database tables if they exist.
@@ -94,6 +182,11 @@ def drop_tables(connection: sqlite3.Connection) -> None:
 
     :param connection: Open SQLite connection from which to remove the schema.
     """
+    connection.execute("DROP TABLE IF EXISTS achievement_progress")
+    connection.execute("DROP TABLE IF EXISTS achievement")
+    connection.execute("DROP TABLE IF EXISTS achievement_group")
+    connection.execute("DROP TABLE IF EXISTS play_activity")
+
     connection.execute("DROP TABLE IF EXISTS source_game_mapping")
     connection.execute("DROP TABLE IF EXISTS external_identifier")
     connection.execute("DROP TABLE IF EXISTS game_release")

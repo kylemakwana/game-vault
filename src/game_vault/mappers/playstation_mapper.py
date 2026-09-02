@@ -40,7 +40,7 @@ class PlayStationMappedData:
 
 
 class PlayStationMapper:
-    """Map a PlayStation snapshot against the curated Game Vault catalog."""
+    """Map a PlayStation snapshot against the curated Game Vault catalogue."""
 
     def __init__(
         self,
@@ -54,7 +54,7 @@ class PlayStationMapper:
         """Initialize the mapper.
 
         :param snapshot: Normalized PlayStation snapshot to map.
-        :param mappings: Known source identifiers and their catalog releases.
+        :param mappings: Known source identifiers and their catalogue releases.
         :param releases: Curated platform-specific game releases.
         :param games: Curated platform-independent games.
         :param series: Curated game series.
@@ -90,9 +90,9 @@ class PlayStationMapper:
         )
 
     def _mapped_releases(self) -> list[GameRelease]:
-        """Return catalog releases referenced by source mappings.
+        """Return catalogue releases referenced by source mappings.
 
-        :return: Mapped catalog releases.
+        :return: Mapped catalogue releases.
         """
         release_ids = {mapping.game_release_id for mapping in self.mappings}
 
@@ -105,7 +105,7 @@ class PlayStationMapper:
     def _mapped_games(self) -> list[Game]:
         """Return games owning the mapped releases.
 
-        :return: Mapped catalog games.
+        :return: Mapped catalogue games.
         """
         game_ids = {release.game_id for release in self._mapped_releases()}
 
@@ -117,7 +117,7 @@ class PlayStationMapper:
     ) -> list[GameSeriesMembership]:
         """Return series memberships for mapped games.
 
-        :param games: Mapped catalog games.
+        :param games: Mapped catalogue games.
         :return: Memberships associated with the mapped games.
         """
         game_ids = {game.id for game in games}
@@ -166,7 +166,7 @@ class PlayStationMapper:
     ) -> list[PlayActivity]:
         """Map eligible played titles into gameplay activities.
 
-        Applications, unmapped titles, and mappings without catalog releases are
+        Applications, unmapped titles, and mappings without catalogue releases are
         omitted.
 
         :param account: Platform account that owns the activities.
@@ -193,7 +193,7 @@ class PlayStationMapper:
 
             activities.append(
                 PlayActivity(
-                    id=f"psn-activity:{title.title_id}",
+                    id=f"ps-activity:{title.title_id}",
                     account_id=account.id,
                     game_release_id=release.id,
                     playtime_seconds=title.play_duration_seconds,
@@ -238,7 +238,7 @@ class PlayStationMapper:
         :param trophy_title: Normalized PlayStation trophy title.
         :param account: Platform account that owns the trophy progress.
         :return: Achievement groups, achievements, and progress records, or
-            ``None`` when the trophy title has no catalog mapping.
+            ``None`` when the trophy title has no catalogue mapping.
         """
         mapping = self._find_release_mapping(
             source_id=trophy_title.np_communication_id,
@@ -253,10 +253,13 @@ class PlayStationMapper:
         progress_records: list[AchievementProgress] = []
 
         for trophy_group in trophy_title.groups:
-            group_id = f"{mapping.game_release_id}-achievements-{trophy_group.group_id}"
+            group_id = (
+                f"{mapping.game_release_id}-achievements-group-{trophy_group.group_id}"
+            )
 
             group = AchievementGroup(
                 id=group_id,
+                game_release_id=mapping.game_release_id,
                 external_group_id=trophy_group.group_id,
                 name=trophy_group.name,
             )

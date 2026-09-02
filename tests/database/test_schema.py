@@ -28,6 +28,10 @@ def test_create_tables_creates_expected_tables(
         "game_release",
         "external_identifier",
         "source_game_mapping",
+        "achievement_group",
+        "achievement",
+        "achievement_progress",
+        "play_activity",
     }
 
 

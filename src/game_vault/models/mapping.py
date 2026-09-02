@@ -1,4 +1,4 @@
-"""Define mappings from external sources to catalog releases."""
+"""Define mappings from external sources to catalogue releases."""
 
 from pydantic import BaseModel
 

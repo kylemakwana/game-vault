@@ -26,6 +26,7 @@ class AchievementGroup(BaseModel):
     """Group related achievements for a game release."""
 
     id: str
+    game_release_id: str
     external_group_id: str
     name: str | None = None
 

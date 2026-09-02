@@ -83,7 +83,7 @@ def test_map_played_titles(mapper):
 
     activity = result[0]
 
-    assert activity.id == "psn-activity:CUSA00001"
+    assert activity.id == "ps-activity:CUSA00001"
     assert activity.account_id == account.id
     assert activity.game_release_id == "test-game-ps5"
     assert activity.playtime_seconds == 7200
@@ -215,7 +215,7 @@ def test_map_trophy_title_creates_achievement_group(
 
     group = groups[0]
 
-    assert group.id == "test-game-ps5-achievements-default"
+    assert group.id == "test-game-ps5-achievements-group-default"
     assert group.external_group_id == "default"
     assert group.name == "Base Game"
 
@@ -235,7 +235,7 @@ def test_map_trophy_title_creates_achievement(
 
     assert achievement.id == "test-game-ps5-achievement-1"
     assert achievement.game_release_id == "test-game-ps5"
-    assert achievement.group_id == "test-game-ps5-achievements-default"
+    assert achievement.group_id == "test-game-ps5-achievements-group-default"
     assert achievement.external_id == "1"
     assert achievement.name == "First Trophy"
     assert achievement.description == "Earn your first trophy"
