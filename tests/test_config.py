@@ -1,14 +1,14 @@
 import importlib
-import sys
 
 
-def test_config_loads_psn_npsso_from_environment(monkeypatch):
-    monkeypatch.setenv("PSN_NPSSO", "test-token")
-    sys.modules.pop("game_vault.config", None)
+def test_config_imports_without_psn_npsso(monkeypatch):
+    monkeypatch.delenv("PSN_NPSSO", raising=False)
 
-    config = importlib.import_module("game_vault.config")
+    from game_vault import config
 
-    assert config.PSN_NPSSO == "test-token"
+    importlib.reload(config)
+
+    assert config.Platform.PLAYSTATION == "PlayStation"
 
 
 def test_playstation_console_values():

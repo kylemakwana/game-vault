@@ -1,16 +1,12 @@
-import importlib
-import sys
-from types import ModuleType
 from unittest.mock import Mock
+
+import pytest
+
+from game_vault import playstation_client
 
 
 def test_create_psn_client_returns_authenticated_user(monkeypatch):
-    config = ModuleType("config")
-    config.PSN_NPSSO = "test-token"
-    monkeypatch.setitem(sys.modules, "config", config)
-    sys.modules.pop("game_vault.playstation_client", None)
-
-    playstation_client = importlib.import_module("game_vault.playstation_client")
+    monkeypatch.setenv("PSN_NPSSO", "test-token")
     authenticated_user = Mock()
     psnawp = Mock()
     psnawp.me.return_value = authenticated_user
@@ -25,3 +21,30 @@ def test_create_psn_client_returns_authenticated_user(monkeypatch):
     load_dotenv.assert_called_once_with()
     psnawp_class.assert_called_once_with("test-token")
     psnawp.me.assert_called_once_with()
+
+
+def test_create_psn_client_loads_token_from_dotenv(monkeypatch):
+    monkeypatch.delenv("PSN_NPSSO", raising=False)
+    monkeypatch.setattr(
+        playstation_client,
+        "load_dotenv",
+        lambda: monkeypatch.setenv("PSN_NPSSO", "dotenv-token"),
+    )
+    psnawp_class = Mock()
+    monkeypatch.setattr(playstation_client, "PSNAWP", psnawp_class)
+
+    playstation_client.create_psn_client()
+
+    psnawp_class.assert_called_once_with("dotenv-token")
+
+
+def test_create_psn_client_requires_token(monkeypatch):
+    monkeypatch.delenv("PSN_NPSSO", raising=False)
+    monkeypatch.setattr(playstation_client, "load_dotenv", Mock())
+    psnawp_class = Mock()
+    monkeypatch.setattr(playstation_client, "PSNAWP", psnawp_class)
+
+    with pytest.raises(KeyError, match="PSN_NPSSO"):
+        playstation_client.create_psn_client()
+
+    psnawp_class.assert_not_called()

@@ -1,13 +1,6 @@
-"""Load environment-backed configuration for Game Vault."""
+"""Define shared configuration values for Game Vault."""
 
-import os
 from enum import StrEnum
-
-from dotenv import load_dotenv
-
-load_dotenv()
-
-PSN_NPSSO = os.environ["PSN_NPSSO"]
 
 
 class Platform(StrEnum):
