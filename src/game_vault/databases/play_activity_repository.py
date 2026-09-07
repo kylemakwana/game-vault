@@ -99,8 +99,12 @@ class PlayActivityRepository:
                 play_activity.game_release_id,
                 play_activity.playtime_seconds,
                 play_activity.play_count,
-                play_activity.first_played_at,
-                play_activity.last_played_at,
+                play_activity.first_played_at.isoformat()
+                if play_activity.first_played_at
+                else None,
+                play_activity.last_played_at.isoformat()
+                if play_activity.last_played_at
+                else None,
                 play_activity.source,
             ),
         )

@@ -94,7 +94,9 @@ class AchievementProgressRepository:
                 achievement_progress.achievement_id,
                 achievement_progress.account_id,
                 achievement_progress.unlocked,
-                achievement_progress.unlocked_at,
+                achievement_progress.unlocked_at.isoformat()
+                if achievement_progress.unlocked_at
+                else None,
                 achievement_progress.progress,
                 achievement_progress.progress_percentage,
                 achievement_progress.progressed_at,
