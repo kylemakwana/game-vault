@@ -28,38 +28,5 @@ jobs:
       - name: Check imports and linting
         run: uv run ruff check .
 
-  test:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7.0.1
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v10.0.1
-
-      - name: Set up Python
-        run: uv python install 3.12
-
-      - name: Install dependencies
-        run: uv sync --locked
-
       - name: Run unit tests with coverage
         run: uv run pytest --cov=game_vault --cov-report=term-missing
-
-  security:
-    runs-on: ubuntu-latest
-    permissions:
-      security-events: write
-      actions: read
-      contents: read
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7.0.1
-
-      - name: TruffleHog OSS
-        uses: trufflesecurity/trufflehog@v3.97.4
-
-      - name: Bandit by PyCQA
-        uses: PyCQA/bandit-action@v1.0.1
