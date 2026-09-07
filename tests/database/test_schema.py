@@ -32,6 +32,7 @@ def test_create_tables_creates_expected_tables(
         "achievement",
         "achievement_progress",
         "play_activity",
+        "platform_account",
     }
 
 

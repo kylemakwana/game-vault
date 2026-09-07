@@ -2,7 +2,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from game_vault.config import Platform, PlayStationConsole
+from game_vault.config import PlatformEnum, PlayStationConsole
 
 
 def test_find_release_mapping_returns_matching_mapping(
@@ -67,8 +67,7 @@ def test_mapped_series_returns_series_for_memberships(
 def test_map_account(mapper):
     result = mapper._map_account()
 
-    assert result.id == "psn:123456789"
-    assert result.service_id == Platform.PLAYSTATION
+    assert result.service_id == PlatformEnum.PLAYSTATION.value
     assert result.username == "TestPlayer"
     assert result.external_account_id == "123456789"
     assert result.avatar_url == "https://example.com/avatar.png"
@@ -83,11 +82,11 @@ def test_map_played_titles(mapper):
 
     activity = result[0]
 
-    assert activity.account_id == account.id
+    assert activity.account_id == account.external_account_id
     assert activity.game_release_id == "test-game-ps5"
     assert activity.playtime_seconds == 7200
     assert activity.play_count == 4
-    assert activity.source == Platform.PLAYSTATION
+    assert activity.source == PlatformEnum.PLAYSTATION.value
 
 
 def test_map_played_titles_ignores_non_games(
@@ -259,7 +258,7 @@ def test_map_trophy_title_creates_achievement_progress(
     progress = progress_records[0]
 
     assert progress.achievement_id == "test-game-ps5-achievement-1"
-    assert progress.account_id == account.id
+    assert progress.account_id == account.external_account_id
     assert progress.unlocked is True
     assert progress.progress_percentage == 100.0
 
@@ -292,8 +291,6 @@ def test_map_returns_complete_mapped_data(
     series_membership,
 ):
     result = mapper.map()
-
-    assert result.account.id == "psn:123456789"
 
     assert result.games == [game]
     assert result.releases == [release]

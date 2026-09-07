@@ -14,6 +14,7 @@ from game_vault.databases.external_identifier_repository import (
 )
 from game_vault.databases.game_release_repository import GameReleaseRepository
 from game_vault.databases.game_repository import GameRepository
+from game_vault.databases.platform_account_repository import PlatformAccountRepository
 from game_vault.databases.play_activity_repository import PlayActivityRepository
 from game_vault.databases.schema import create_tables, drop_tables
 from game_vault.databases.source_game_mapping_repository import (
@@ -233,6 +234,7 @@ def import_playstation() -> None:
         achievement_group_repository = AchievementGroupRepository(connection)
         achievement_progress_repository = AchievementProgressRepository(connection)
         play_activity_repository = PlayActivityRepository(connection)
+        platform_account_repository = PlatformAccountRepository(connection)
 
         playstation_import_service = PlaystationImportService(
             game_repository=game_repository,
@@ -243,6 +245,7 @@ def import_playstation() -> None:
             achievement_group_repository=achievement_group_repository,
             achievement_progress_repository=achievement_progress_repository,
             play_activity_repository=play_activity_repository,
+            platform_account_repository=platform_account_repository,
         )
 
         playstation_import_service.import_data(mapped_data)

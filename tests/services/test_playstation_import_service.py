@@ -1,5 +1,6 @@
 import pytest
 
+from game_vault.config import PlatformEnum
 from game_vault.databases.achievement_group_repository import AchievementGroupRepository
 from game_vault.databases.achievement_progress_repository import (
     AchievementProgressRepository,
@@ -11,6 +12,7 @@ from game_vault.databases.external_identifier_repository import (
 )
 from game_vault.databases.game_release_repository import GameReleaseRepository
 from game_vault.databases.game_repository import GameRepository
+from game_vault.databases.platform_account_repository import PlatformAccountRepository
 from game_vault.databases.play_activity_repository import PlayActivityRepository
 from game_vault.databases.schema import create_tables
 from game_vault.databases.source_game_mapping_repository import (
@@ -25,7 +27,7 @@ from game_vault.models.achievement import (
 from game_vault.models.activity import PlayActivity
 from game_vault.models.game import Game, GameRelease
 from game_vault.models.mapping import SourceGameMapping
-from game_vault.models.platform import ExternalIdentifier
+from game_vault.models.platform import ExternalIdentifier, PlatformAccount
 from game_vault.services.playstation_import_service import PlaystationImportService
 
 
@@ -80,6 +82,11 @@ def play_activity_repository(connection) -> PlayActivityRepository:
 
 
 @pytest.fixture
+def platform_account_repository(connection) -> PlatformAccountRepository:
+    return PlatformAccountRepository(connection)
+
+
+@pytest.fixture
 def import_service(
     game_repository,
     game_release_repository,
@@ -89,6 +96,7 @@ def import_service(
     achievement_group_repository,
     achievement_progress_repository,
     play_activity_repository,
+    platform_account_repository,
 ) -> PlaystationImportService:
     return PlaystationImportService(
         game_repository=game_repository,
@@ -99,6 +107,7 @@ def import_service(
         achievement_group_repository=achievement_group_repository,
         achievement_progress_repository=achievement_progress_repository,
         play_activity_repository=play_activity_repository,
+        platform_account_repository=platform_account_repository,
     )
 
 
@@ -114,7 +123,7 @@ def mapped_game() -> Game:
 @pytest.fixture
 def mapped_identifier() -> ExternalIdentifier:
     return ExternalIdentifier(
-        service="playstation_network",
+        service=PlatformEnum.PLAYSTATION,
         identifier_type="title_id",
         value="CUSA00265_00",
     )
@@ -184,12 +193,21 @@ def mapped_achievement_progress(mapped_achievement) -> AchievementProgress:
 @pytest.fixture
 def mapped_activity(mapped_release) -> PlayActivity:
     return PlayActivity(
-        id="ps-activity:CUSA00265_00",
         account_id="psn:123456789",
         game_release_id=mapped_release.id,
         playtime_seconds=7200,
         play_count=4,
         source="PlayStation",
+    )
+
+
+@pytest.fixture
+def mapped_account() -> PlatformAccount:
+    return PlatformAccount(
+        service_id=PlatformEnum.PLAYSTATION,
+        username="User1234",
+        external_account_id="123456789",
+        avatar_url="https://www.testurl.com/avatar.jpg",
     )
 
 
@@ -202,6 +220,7 @@ def mapped_data(
     mapped_achievement,
     mapped_achievement_progress,
     mapped_activity,
+    mapped_account,
 ) -> PlayStationMappedData:
     return PlayStationMappedData(
         games=[mapped_game],
@@ -211,6 +230,7 @@ def mapped_data(
         achievements=[mapped_achievement],
         achievement_progress=[mapped_achievement_progress],
         activities=[mapped_activity],
+        account=mapped_account,
     )
 
 
@@ -233,6 +253,7 @@ def test_importing_mapped_data_persists_catalogue_records(
     mapped_achievement,
     mapped_achievement_progress,
     mapped_activity,
+    mapped_account,
 ):
     import_service.import_data(mapped_data)
 

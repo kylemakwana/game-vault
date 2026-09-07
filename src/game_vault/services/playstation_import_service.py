@@ -10,6 +10,7 @@ from game_vault.databases.external_identifier_repository import (
 )
 from game_vault.databases.game_release_repository import GameReleaseRepository
 from game_vault.databases.game_repository import GameRepository
+from game_vault.databases.platform_account_repository import PlatformAccountRepository
 from game_vault.databases.play_activity_repository import PlayActivityRepository
 from game_vault.databases.source_game_mapping_repository import (
     SourceGameMappingRepository,
@@ -32,6 +33,7 @@ class PlaystationImportService:
         achievement_group_repository: AchievementGroupRepository,
         achievement_progress_repository: AchievementProgressRepository,
         play_activity_repository: PlayActivityRepository,
+        platform_account_repository: PlatformAccountRepository,
     ):
         self.game_repository = game_repository
         self.game_release_repository = game_release_repository
@@ -41,6 +43,7 @@ class PlaystationImportService:
         self.achievement_group_repository = achievement_group_repository
         self.achievement_progress_repository = achievement_progress_repository
         self.play_activity_repository = play_activity_repository
+        self.platform_account_repository = platform_account_repository
 
     def import_data(self, mapped_data: PlayStationMappedData) -> None:
         """Import mapped PlayStation data into Game Vault."""
@@ -85,7 +88,6 @@ class PlaystationImportService:
             self.achievement_repository.upsert(achievement)
 
         print("Achievements imported!\n")
-
         print(
             f"Importing progress of {len(mapped_data.achievement_progress)} "
             f"achievements..."
@@ -101,4 +103,8 @@ class PlaystationImportService:
             self.play_activity_repository.upsert(activity)
 
         print("Activity imported!\n")
+        print("Importing PlayStation account...")
+        self.platform_account_repository.upsert(mapped_data.account)
+
+        print("PlayStation account imported!\n")
         print("Import successful! All PlayStation data imported!\n")

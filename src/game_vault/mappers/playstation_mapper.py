@@ -1,8 +1,8 @@
-"""Map normalized PlayStation snapshots into Game Vault domain records."""
+"""Map normalised PlayStation snapshots into Game Vault domain records."""
 
 from dataclasses import dataclass, field
 
-from game_vault.config import Platform, PlayStationConsole
+from game_vault.config import PlatformEnum, PlayStationConsole
 from game_vault.models.achievement import (
     Achievement,
     AchievementGroup,
@@ -23,6 +23,7 @@ from game_vault.models.series import GameSeries, GameSeriesMembership
 class PlayStationMappedData:
     """Collect all domain records produced from a PlayStation snapshot."""
 
+    account: PlatformAccount
     games: list[Game]
     releases: list[GameRelease] = field(default_factory=list)
 
@@ -36,7 +37,6 @@ class PlayStationMappedData:
     achievement_progress: list[AchievementProgress] = field(default_factory=list)
 
     mappings: list[SourceGameMapping] = field(default_factory=list)
-    account: PlatformAccount | None = None
 
 
 class PlayStationMapper:
@@ -51,7 +51,7 @@ class PlayStationMapper:
         series: list[GameSeries],
         series_memberships: list[GameSeriesMembership],
     ):
-        """Initialize the mapper.
+        """Initialise the mapper.
 
         :param snapshot: Normalized PlayStation snapshot to map.
         :param mappings: Known source identifiers and their catalogue releases.
@@ -153,8 +153,7 @@ class PlayStationMapper:
         account = self.snapshot.account
 
         return PlatformAccount(
-            id=f"psn:{account.account_id}",
-            service_id=Platform.PLAYSTATION,
+            service_id=PlatformEnum.PLAYSTATION,
             username=account.online_id,
             external_account_id=account.account_id,
             avatar_url=account.avatar_url,
@@ -193,13 +192,13 @@ class PlayStationMapper:
 
             activities.append(
                 PlayActivity(
-                    account_id=account.id,
+                    account_id=account.external_account_id,
                     game_release_id=release.id,
                     playtime_seconds=title.play_duration_seconds,
                     play_count=title.play_count,
                     first_played_at=title.first_played_at,
                     last_played_at=title.last_played_at,
-                    source=Platform.PLAYSTATION,
+                    source=PlatformEnum.PLAYSTATION,
                 )
             )
 
@@ -290,7 +289,7 @@ class PlayStationMapper:
 
                 progress = AchievementProgress(
                     achievement_id=achievement_id,
-                    account_id=account.id,
+                    account_id=account.external_account_id,
                     unlocked=user_progress.earned,
                     unlocked_at=user_progress.earned_at,
                     progress=user_progress.progress,

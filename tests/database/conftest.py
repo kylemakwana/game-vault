@@ -1,5 +1,6 @@
 import pytest
 
+from game_vault.config import PlatformEnum
 from game_vault.databases.connection import get_connection
 from game_vault.databases.schema import create_tables
 from game_vault.models.achievement import (
@@ -70,7 +71,7 @@ def second_game():
 def external_identifier():
     return ExternalIdentifier.model_validate(
         {
-            "service": "playstation_network",
+            "service": PlatformEnum.PLAYSTATION.value,
             "identifier_type": "title_id",
             "value": "CUSA00265_00",
         }
@@ -81,7 +82,7 @@ def external_identifier():
 def second_external_identifier():
     return ExternalIdentifier.model_validate(
         {
-            "service": "playstation_network",
+            "service": PlatformEnum.PLAYSTATION.value,
             "identifier_type": "trophy_set",
             "value": "NPWR05567_00",
         }
@@ -292,7 +293,6 @@ def achievement_progress(stored_achievement):
 @pytest.fixture
 def play_activity(stored_game_release):
     return PlayActivity(
-        id="ps-activity:CUSA00265_00",
         account_id="psn:123456789",
         game_release_id=stored_game_release.id,
         playtime_seconds=7200,

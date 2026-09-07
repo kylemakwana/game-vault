@@ -2,6 +2,8 @@
 
 from pydantic import BaseModel
 
+from game_vault.config import PlatformEnum
+
 
 class Platform(BaseModel):
     """Represent a hardware or software gaming platform."""
@@ -24,7 +26,7 @@ class GameService(BaseModel):
 class ExternalIdentifier(BaseModel):
     """Identify a release within an external service."""
 
-    service: str
+    service: PlatformEnum
     identifier_type: str
     value: str
 
@@ -32,9 +34,7 @@ class ExternalIdentifier(BaseModel):
 class PlatformAccount(BaseModel):
     """Represent a user's account on a gaming service."""
 
-    id: str
-
-    service_id: str
+    service_id: PlatformEnum
 
     username: str | None = None
     external_account_id: str | None = None

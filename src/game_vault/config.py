@@ -3,7 +3,7 @@
 from enum import StrEnum
 
 
-class Platform(StrEnum):
+class PlatformEnum(StrEnum):
     """Platform enum."""
 
     PLAYSTATION = "PlayStation"

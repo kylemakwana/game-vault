@@ -8,7 +8,7 @@ def test_config_imports_without_psn_npsso(monkeypatch):
 
     importlib.reload(config)
 
-    assert config.Platform.PLAYSTATION == "PlayStation"
+    assert config.PlatformEnum.PLAYSTATION == "PlayStation"
 
 
 def test_playstation_console_values():

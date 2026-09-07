@@ -182,6 +182,19 @@ def create_tables(connection: sqlite3.Connection) -> None:
         """
     )
 
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS platform_account (
+            service_id TEXT NOT NULL,
+            username TEXT NOT NULL,
+            external_account_id TEXT NOT NULL,
+            avatar_url TEXT,
+            
+            PRIMARY KEY (service_id, external_account_id)
+        )
+        """
+    )
+
 
 def drop_tables(connection: sqlite3.Connection) -> None:
     """Drop all Game Vault database tables if they exist.
@@ -190,6 +203,8 @@ def drop_tables(connection: sqlite3.Connection) -> None:
 
     :param connection: Open SQLite connection from which to remove the schema.
     """
+    connection.execute("DROP TABLE IF EXISTS platform_account")
+
     connection.execute("DROP TABLE IF EXISTS achievement_progress")
     connection.execute("DROP TABLE IF EXISTS achievement")
     connection.execute("DROP TABLE IF EXISTS achievement_group")
