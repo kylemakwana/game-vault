@@ -31,9 +31,5 @@ jobs:
       - name: Run unit tests with coverage
         run: uv run pytest --cov=game_vault --cov-report=term-missing
 
-      - name: Bandit by PyCQA
-  # You may pin to the exact commit or the version.
-  # uses: PyCQA/bandit-action@67a458d90fa11fb1463e91e7f4c8f068b5863c7f
-  uses: PyCQA/bandit-action@v1.0.1
-  with:
-    targets: .
+      - name: Perform Bandit Analysis
+        uses: PyCQA/bandit-action@v1.0.1
