@@ -99,7 +99,9 @@ class AchievementProgressRepository:
                 else None,
                 achievement_progress.progress,
                 achievement_progress.progress_percentage,
-                achievement_progress.progressed_at,
+                achievement_progress.progressed_at.isoformat()
+                if achievement_progress.progressed_at
+                else None,
             ),
         )
 
