@@ -28,8 +28,19 @@ jobs:
       - name: Check imports and linting
         run: uv run ruff check .
 
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
       - name: Run unit tests with coverage
         run: uv run pytest --cov=game_vault --cov-report=term-missing
 
-      - name: Perform Bandit Analysis
+  security:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: TruffleHog OSS
+        uses: trufflesecurity/trufflehog@v3.97.4
+
+      - name: Bandit by PyCQA
         uses: PyCQA/bandit-action@v1.0.1
