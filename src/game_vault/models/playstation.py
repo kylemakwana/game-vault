@@ -4,6 +4,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
+from game_vault.config import PlayStationConsoleEnum
+
 
 class TrophyCounts(BaseModel):
     """Store trophy counts by PlayStation trophy type."""
@@ -65,7 +67,7 @@ class PlayStationDevice(BaseModel):
     activations: list[DeviceActivation] = Field(default_factory=list)
 
 
-class PlayedTitle(BaseModel):
+class PlayStationPlayedTitle(BaseModel):
     """Represent a title in the account's PlayStation play history."""
 
     title_id: str
@@ -175,7 +177,7 @@ class ValidationResult(BaseModel):
 
 
 class PlayStationSnapshot(BaseModel):
-    """Aggregate normalized account, activity, device, and trophy data."""
+    """Aggregate normalised account, activity, device, and trophy data."""
 
     snapshot: SnapshotMetadata
 
@@ -183,7 +185,23 @@ class PlayStationSnapshot(BaseModel):
     trophy_summary: TrophySummary
 
     devices: list[PlayStationDevice]
-    played_titles: list[PlayedTitle]
+    played_titles: list[PlayStationPlayedTitle]
     trophy_titles: list[PlaystationTrophyTitle]
 
     validation: ValidationResult
+
+
+class PlayStationSourceKey(BaseModel):
+    source_type: str
+    source_id: str
+
+
+class PlayStationTitleCandidate(BaseModel):
+    source_key: list[PlayStationSourceKey]
+    names: list[str]
+    platforms: list[PlayStationConsoleEnum]
+    product_ids: list[str]
+    np_communication_ids: list[str]
+    np_title_ids: list[str]
+    played_title: PlayStationPlayedTitle | None = None
+    trophy_title: PlaystationTrophyTitle | None = None

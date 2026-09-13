@@ -2,10 +2,47 @@ import pytest
 from pydantic import ValidationError
 
 from game_vault.models.playstation import (
+    PlayStationSourceKey,
+    PlayStationTitleCandidate,
     PlaystationTrophyGroup,
     PlaystationTrophyTitle,
     TrophyCounts,
 )
+
+
+def test_candidate_validates_nested_source_keys_and_round_trips():
+    candidate = PlayStationTitleCandidate.model_validate(
+        {
+            "source_key": [{"source_type": "Played Title", "source_id": "PPSA001"}],
+            "names": ["Test Game"],
+            "platforms": ["PS5"],
+            "product_ids": ["PPSA001"],
+            "np_communication_ids": [],
+            "np_title_ids": [],
+        }
+    )
+    assert candidate.source_key == [
+        PlayStationSourceKey(source_type="Played Title", source_id="PPSA001")
+    ]
+    assert candidate.platforms[0].value == "PS5"
+    assert candidate.played_title is None
+    assert candidate.trophy_title is None
+    assert (
+        PlayStationTitleCandidate.model_validate_json(candidate.model_dump_json())
+        == candidate
+    )
+
+
+def test_candidate_rejects_unknown_platform():
+    with pytest.raises(ValidationError, match="platforms"):
+        PlayStationTitleCandidate(
+            source_key=[],
+            names=[],
+            platforms=["PS6"],
+            product_ids=[],
+            np_communication_ids=[],
+            np_title_ids=[],
+        )
 
 
 def test_trophy_counts_total_sums_all_trophy_types():

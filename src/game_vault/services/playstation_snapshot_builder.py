@@ -7,9 +7,9 @@ from pathlib import Path
 
 from game_vault.models.playstation import (
     DeviceActivation,
-    PlayedTitle,
     PlayStationAccount,
     PlayStationDevice,
+    PlayStationPlayedTitle,
     PlayStationSnapshot,
     PlaystationTrophyGroup,
     PlaystationTrophyTitle,
@@ -228,7 +228,7 @@ class PlayStationSnapshotBuilder:
     def _build_played_titles(
         self,
         played_titles: list[dict],
-    ) -> list[PlayedTitle]:
+    ) -> list[PlayStationPlayedTitle]:
         """Build normalized played-title records.
 
         :param played_titles: Raw played-title records.
@@ -240,7 +240,7 @@ class PlayStationSnapshotBuilder:
             content_type, classification_source = self._classify_title(title)
 
             titles.append(
-                PlayedTitle(
+                PlayStationPlayedTitle(
                     title_id=title["title_id"],
                     name=title["name"],
                     image_url=title["image_url"],

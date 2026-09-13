@@ -18,7 +18,10 @@ from game_vault.databases.schema import create_tables
 from game_vault.databases.source_game_mapping_repository import (
     SourceGameMappingRepository,
 )
-from game_vault.mappers.playstation_mapper import PlayStationMappedData
+from game_vault.mappers.playstation_mapper import (
+    PlayStationMappedData,
+    PlayStationMapper,
+)
 from game_vault.models.achievement import (
     Achievement,
     AchievementGroup,
@@ -28,6 +31,10 @@ from game_vault.models.activity import PlayActivity
 from game_vault.models.game import Game, GameRelease
 from game_vault.models.mapping import SourceGameMapping
 from game_vault.models.platform import ExternalIdentifier, PlatformAccount
+from game_vault.models.playstation import PlayStationSnapshot
+from game_vault.services.playstation_discovery_service import (
+    PlayStationDiscoveryService,
+)
 from game_vault.services.playstation_import_service import PlaystationImportService
 
 
@@ -380,3 +387,114 @@ def test_importing_same_mapped_data_twice_is_idempotent(
         count = connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
 
         assert count == 1
+
+
+@pytest.mark.parametrize("include_trophy_details", [True, False])
+def test_raw_snapshot_to_database_and_repeat_import(
+    snapshot_builder,
+    tmp_path,
+    import_service,
+    connection,
+    game_repository,
+    game_release_repository,
+    source_game_mapping_repository,
+    achievement_repository,
+    achievement_group_repository,
+    achievement_progress_repository,
+    play_activity_repository,
+    platform_account_repository,
+    include_trophy_details,
+):
+    """Exercise real JSON, models, mapper and SQLite repositories together."""
+    if not include_trophy_details:
+        (snapshot_builder.trophy_dir / "TEST12345_00.json").unlink()
+    snapshot = snapshot_builder.build()
+    snapshot_path = tmp_path / "snapshot.json"
+    snapshot_path.write_text(snapshot.model_dump_json(), encoding="utf-8")
+    snapshot = PlayStationSnapshot.model_validate_json(
+        snapshot_path.read_text(encoding="utf-8")
+    )
+    assert snapshot.validation.trophy_detail_import_complete is include_trophy_details
+    candidates = PlayStationDiscoveryService().discover(snapshot)
+    assert {
+        key.source_id for candidate in candidates for key in candidate.source_key
+    } == {"TEST12345_00", "TEST67890_00", "TEST23456_00"}
+
+    # Discovery supplies evidence; release resolution currently uses curated mappings.
+    game = Game(id="test-game", name="Test Game")
+    release = GameRelease(
+        id="test-game-ps5",
+        game_id=game.id,
+        platform_id="PS5",
+        name=game.name,
+        external_identifiers=[
+            ExternalIdentifier(
+                service=PlatformEnum.PLAYSTATION,
+                identifier_type="title_id",
+                value="TEST12345_00",
+            )
+        ],
+    )
+    mappings = [
+        SourceGameMapping(
+            source=source,
+            source_id="TEST12345_00",
+            game_release_id=release.id,
+            match_method="manual",
+            confidence=1.0,
+        )
+        for source in ("playstation_title", "playstation_trophy_set")
+    ]
+    mapped = PlayStationMapper(
+        snapshot=snapshot,
+        mappings=mappings,
+        games=[game],
+        releases=[release],
+        series=[],
+        series_memberships=[],
+    ).map()
+
+    for _ in range(2):
+        import_service.import_data(mapped)
+        assert game_repository.get(game.id) == game
+        assert game_release_repository.get(release.id) == release
+        assert (
+            platform_account_repository.get_by_id_and_platform(
+                "123456789", PlatformEnum.PLAYSTATION
+            )
+            == mapped.account
+        )
+        activity = play_activity_repository.get(release.id, "123456789")
+        assert activity.playtime_seconds == 62856
+        assert activity.play_count == 154
+        assert activity.first_played_at == snapshot.played_titles[0].first_played_at
+        for mapping in mappings:
+            assert (
+                source_game_mapping_repository.get(mapping.source, mapping.source_id)
+                == mapping
+            )
+        if include_trophy_details:
+            achievement = achievement_repository.get("test-game-ps5-achievement-1")
+            assert achievement.name == "Test Trophy 2"
+            assert achievement.hidden is True
+            assert achievement_group_repository.get(achievement.group_id) is not None
+            progress = achievement_progress_repository.get(achievement.id, "123456789")
+            assert progress.unlocked is True
+            assert progress.unlocked_at == (
+                snapshot.trophy_titles[0].groups[0].trophies[1].user_progress.earned_at
+            )
+        for table, expected in {
+            "game": 1,
+            "game_release": 1,
+            "external_identifier": 1,
+            "source_game_mapping": 2,
+            "platform_account": 1,
+            "play_activity": 1,
+            "achievement_group": int(include_trophy_details),
+            "achievement": 2 * int(include_trophy_details),
+            "achievement_progress": 2 * int(include_trophy_details),
+        }.items():
+            assert (
+                connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
+                == expected
+            )

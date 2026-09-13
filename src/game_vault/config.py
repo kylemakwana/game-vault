@@ -10,16 +10,24 @@ class PlatformEnum(StrEnum):
     STEAM = "Steam"
 
 
-class PlayStationConsole(StrEnum):
+class PlayStationConsoleEnum(StrEnum):
     """PlayStation Console enum."""
 
     PS5 = "PS5"
     PS4 = "PS4"
     PS3 = "PS3"
-    PS_UNKNOWN = "Unknown PlayStation console"
+    UNKNOWN = "Unknown PlayStation console"
 
 
-class IdentifierType(StrEnum):
+class PlayStationTitleCategoryEnum(StrEnum):
+    """Mapped PlayStation Console enum."""
+
+    PS5_NATIVE_GAME = "ps5_native_game"
+    PS4_GAME = "ps4_game"
+    UNKNOWN = "unknown"
+
+
+class IdentifierTypeEnum(StrEnum):
     """Identifier enum."""
 
     PLAYED_TITLE = "Played Title"

@@ -3,6 +3,7 @@ from datetime import UTC
 
 import pytest
 
+from game_vault.models.playstation import PlayStationPlayedTitle, PlayStationSnapshot
 from game_vault.services.playstation_snapshot_builder import PlayStationSnapshotBuilder
 
 
@@ -475,6 +476,11 @@ def test_build_validation_warns_when_trophy_totals_do_not_match(
 
 def test_build_returns_complete_snapshot(snapshot_builder):
     result = snapshot_builder.build()
+
+    assert all(
+        isinstance(title, PlayStationPlayedTitle) for title in result.played_titles
+    )
+    assert PlayStationSnapshot.model_validate_json(result.model_dump_json()) == result
 
     assert result.account.online_id == "TestUser"
     assert result.account.account_id == "123456789"
