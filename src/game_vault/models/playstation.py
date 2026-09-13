@@ -200,7 +200,7 @@ class PlayStationTitleCandidate(BaseModel):
     source_key: list[PlayStationSourceKey]
     names: list[str]
     platforms: list[PlayStationPlatformEnum]
-    product_ids: list[str]
+    title_ids: list[str]
     np_communication_ids: list[str]
     np_title_ids: list[str]
     played_title: PlayStationPlayedTitle | None = None

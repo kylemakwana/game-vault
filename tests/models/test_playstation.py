@@ -16,7 +16,7 @@ def test_candidate_validates_nested_source_keys_and_round_trips():
             "source_key": [{"source_type": "Played Title", "source_id": "PPSA001"}],
             "names": ["Test Game"],
             "platforms": ["PS5"],
-            "product_ids": ["PPSA001"],
+            "title_ids": ["PPSA001"],
             "np_communication_ids": [],
             "np_title_ids": [],
         }
@@ -39,7 +39,7 @@ def test_candidate_rejects_unknown_platform():
             source_key=[],
             names=[],
             platforms=["PS6"],
-            product_ids=[],
+            title_ids=[],
             np_communication_ids=[],
             np_title_ids=[],
         )

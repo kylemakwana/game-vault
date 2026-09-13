@@ -17,6 +17,7 @@ class PlayStationPlatformEnum(StrEnum):
     PS4 = "PS4"
     PS3 = "PS3"
     PSPC = "PSPC"
+    PSVITA = "PSVITA"
     UNKNOWN = "Unknown PlayStation console"
 
 

@@ -40,7 +40,7 @@ def test_matching_titles_merge_evidence_without_changing_snapshot(
         PlayStationPlatformEnum.PS5,
         PlayStationPlatformEnum.PS4,
     ]
-    assert candidate.product_ids == ["TEST12345_00"]
+    assert candidate.title_ids == ["TEST12345_00"]
     assert candidate.np_communication_ids == ["TEST12345_00"]
     assert candidate.np_title_ids == ([] if np_title_id is None else [np_title_id])
     assert [(key.source_type, key.source_id) for key in candidate.source_key] == [
@@ -85,7 +85,7 @@ def test_trophy_only_deduplicates_platforms(snapshot, np_title_id):
         PlayStationPlatformEnum.PS5,
         PlayStationPlatformEnum.UNKNOWN,
     ]
-    assert candidate.product_ids == []
+    assert candidate.title_ids == []
     assert candidate.np_title_ids == ([] if np_title_id is None else [np_title_id])
     assert candidate.np_communication_ids == ["TEST12345_00"]
     assert candidate.source_key[0].source_type == IdentifierTypeEnum.TROPHY_TITLE
@@ -114,9 +114,9 @@ def test_duplicate_played_names_match_each_trophy_only_once(snapshot):
         )
     )
     first, second = PlayStationDiscoveryService().discover(snapshot)
-    assert first.product_ids == ["TEST12345_00"]
+    assert first.title_ids == ["TEST12345_00"]
     assert first.np_communication_ids == ["TEST12345_00"]
-    assert second.product_ids == ["SECOND_PRODUCT"]
+    assert second.title_ids == ["SECOND_PRODUCT"]
     assert second.np_communication_ids == ["SECOND_SET"]
 
 

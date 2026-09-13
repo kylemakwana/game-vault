@@ -18,6 +18,7 @@ def test_playstation_console_values():
     assert PlayStationPlatformEnum.PS4 == "PS4"
     assert PlayStationPlatformEnum.PS3 == "PS3"
     assert PlayStationPlatformEnum.PSPC == "PSPC"
+    assert PlayStationPlatformEnum.PSVITA == "PSVITA"
     assert PlayStationPlatformEnum.UNKNOWN == "Unknown PlayStation console"
 
 

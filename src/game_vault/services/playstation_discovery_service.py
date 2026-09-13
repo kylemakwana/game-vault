@@ -96,7 +96,7 @@ class PlayStationDiscoveryService:
             ],
             names=[played_title.name],
             platforms=[platform],
-            product_ids=self._optional_list(played_title.title_id),
+            title_ids=self._optional_list(played_title.title_id),
             np_communication_ids=[],
             np_title_ids=[],
             played_title=played_title,
@@ -130,7 +130,7 @@ class PlayStationDiscoveryService:
             ],
             names=[trophy_title.title_name],
             platforms=platforms,
-            product_ids=[],
+            title_ids=[],
             np_communication_ids=[trophy_title.np_communication_id],
             np_title_ids=self._optional_list(trophy_title.np_title_id),
             played_title=None,
@@ -211,6 +211,8 @@ class PlayStationDiscoveryService:
             return platform
 
         match platform.upper():
+            case "PSVITA":
+                return PlayStationPlatformEnum.PSVITA
             case "PSPC":
                 return PlayStationPlatformEnum.PSPC
             case "PS5":
