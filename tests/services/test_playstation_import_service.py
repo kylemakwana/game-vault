@@ -1,6 +1,6 @@
 import pytest
 
-from game_vault.config import PlatformEnum
+from game_vault.config import IdentifierTypeEnum, PlatformEnum
 from game_vault.databases.achievement_group_repository import AchievementGroupRepository
 from game_vault.databases.achievement_progress_repository import (
     AchievementProgressRepository,
@@ -32,6 +32,7 @@ from game_vault.models.game import Game, GameRelease
 from game_vault.models.mapping import SourceGameMapping
 from game_vault.models.platform import ExternalIdentifier, PlatformAccount
 from game_vault.models.playstation import PlayStationSnapshot
+from game_vault.models.resolution import MatchMethodEnum
 from game_vault.services.playstation_discovery_service import (
     PlayStationDiscoveryService,
 )
@@ -131,7 +132,7 @@ def mapped_game() -> Game:
 def mapped_identifier() -> ExternalIdentifier:
     return ExternalIdentifier(
         service=PlatformEnum.PLAYSTATION,
-        identifier_type="title_id",
+        identifier_type=IdentifierTypeEnum.TITLE_ID,
         value="CUSA00265_00",
     )
 
@@ -153,7 +154,7 @@ def mapped_mapping() -> SourceGameMapping:
         source="playstation_title",
         source_id="CUSA00265_00",
         game_release_id="minecraft-ps4",
-        match_method="external_id",
+        match_method=MatchMethodEnum.EXTERNAL_IDENTIFIER,
         confidence=1.0,
     )
 
@@ -430,7 +431,7 @@ def test_raw_snapshot_to_database_and_repeat_import(
         external_identifiers=[
             ExternalIdentifier(
                 service=PlatformEnum.PLAYSTATION,
-                identifier_type="title_id",
+                identifier_type=IdentifierTypeEnum.TITLE_ID,
                 value="TEST12345_00",
             )
         ],

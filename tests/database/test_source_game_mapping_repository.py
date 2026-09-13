@@ -245,7 +245,7 @@ def test_upsert_updates_existing_mapping(
         source="playstation",
         source_id="PPSA17221_00",
         game_release_id="minecraft-ps4",
-        match_method="external_id",
+        match_method="external_identifier",
         confidence=0.95,
     )
 

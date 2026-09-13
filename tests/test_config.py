@@ -1,6 +1,20 @@
 import importlib
 
 
+def test_source_types_and_identifier_types_use_distinct_namespaces():
+    from game_vault.config import IdentifierTypeEnum, PlayStationSourceTypeEnum
+
+    assert {item.value for item in PlayStationSourceTypeEnum} == {
+        "Played Title",
+        "Trophy Title",
+    }
+    assert {item.value for item in IdentifierTypeEnum} == {
+        "TITLE_ID",
+        "NP_COMMUNICATION_ID",
+        "NP_TITLE_ID",
+    }
+
+
 def test_config_imports_without_psn_npsso(monkeypatch):
     monkeypatch.delenv("PSN_NPSSO", raising=False)
 

@@ -2,7 +2,10 @@
 
 from dataclasses import dataclass, field
 
-from game_vault.config import PlatformEnum, PlayStationPlatformEnum
+from game_vault.config import (
+    PlatformEnum,
+    PlayStationPlatformEnum,
+)
 from game_vault.models.achievement import (
     Achievement,
     AchievementGroup,

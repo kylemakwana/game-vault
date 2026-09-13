@@ -1,6 +1,6 @@
 import pytest
 
-from game_vault.config import PlatformEnum
+from game_vault.config import IdentifierTypeEnum, PlatformEnum
 from game_vault.databases.connection import get_connection
 from game_vault.databases.schema import create_tables
 from game_vault.models.achievement import (
@@ -72,7 +72,7 @@ def external_identifier():
     return ExternalIdentifier.model_validate(
         {
             "service": PlatformEnum.PLAYSTATION.value,
-            "identifier_type": "title_id",
+            "identifier_type": IdentifierTypeEnum.TITLE_ID,
             "value": "CUSA00265_00",
         }
     )
@@ -83,7 +83,7 @@ def second_external_identifier():
     return ExternalIdentifier.model_validate(
         {
             "service": PlatformEnum.PLAYSTATION.value,
-            "identifier_type": "trophy_set",
+            "identifier_type": IdentifierTypeEnum.NP_COMMUNICATION_ID,
             "value": "NPWR05567_00",
         }
     )

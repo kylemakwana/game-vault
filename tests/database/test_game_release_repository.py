@@ -147,7 +147,11 @@ def test_get_by_game_id_loads_external_identifiers(
     result = repository.get_by_game_id(stored_game.id)
 
     assert len(result) == 1
-    assert result[0].external_identifiers == game_release.external_identifiers
+    assert sorted(
+        result[0].external_identifiers, key=lambda identifier: identifier.value
+    ) == sorted(
+        game_release.external_identifiers, key=lambda identifier: identifier.value
+    )
 
 
 def test_get_all_returns_empty_list_when_no_releases_exist(

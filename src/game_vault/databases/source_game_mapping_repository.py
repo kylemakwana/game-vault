@@ -44,7 +44,7 @@ class SourceGameMappingRepository:
     def get_by_game_release_id(self, game_release_id: str) -> list[SourceGameMapping]:
         """Return all mappings that target a release.
 
-        :param game_release_id: Catalog release identifier.
+        :param game_release_id: Catalogue release identifier.
         :return: Source mappings associated with the release.
         """
         rows = self.connection.execute(

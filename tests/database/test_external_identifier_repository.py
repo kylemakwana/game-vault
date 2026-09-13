@@ -1,6 +1,69 @@
+import pytest
+
+from game_vault.config import IdentifierTypeEnum, PlatformEnum
 from game_vault.databases.external_identifier_repository import (
     ExternalIdentifierRepository,
 )
+
+
+@pytest.mark.parametrize(
+    ("service", "identifier_type", "value", "matches"),
+    [
+        (PlatformEnum.PLAYSTATION, IdentifierTypeEnum.TITLE_ID, "CUSA00265_00", True),
+        (PlatformEnum.STEAM, IdentifierTypeEnum.TITLE_ID, "CUSA00265_00", False),
+        (
+            PlatformEnum.PLAYSTATION,
+            IdentifierTypeEnum.NP_TITLE_ID,
+            "CUSA00265_00",
+            False,
+        ),
+        (PlatformEnum.PLAYSTATION, IdentifierTypeEnum.TITLE_ID, "missing", False),
+        (PlatformEnum.PLAYSTATION, IdentifierTypeEnum.TITLE_ID, "' OR 1=1 --", False),
+    ],
+)
+def test_find_game_release_ids_filters_all_identifier_fields(
+    db_connection,
+    stored_game_release,
+    external_identifier,
+    service,
+    identifier_type,
+    value,
+    matches,
+):
+    repository = ExternalIdentifierRepository(db_connection)
+    repository.insert(stored_game_release.id, external_identifier)
+    assert repository.find_game_release_ids(service, identifier_type, value) == (
+        [stored_game_release.id] if matches else []
+    )
+
+
+def test_find_game_release_ids_returns_all_matching_releases(
+    db_connection,
+    stored_game_release,
+    external_identifier,
+):
+    db_connection.execute(
+        "INSERT INTO game_release (id, game_id, platform_id, name) VALUES (?, ?, ?, ?)",
+        ("minecraft-ps5", stored_game_release.game_id, "ps5", "Minecraft"),
+    )
+    repository = ExternalIdentifierRepository(db_connection)
+    for release_id in (stored_game_release.id, "minecraft-ps5"):
+        repository.insert(release_id, external_identifier)
+    assert set(
+        repository.find_game_release_ids(
+            PlatformEnum.PLAYSTATION, IdentifierTypeEnum.TITLE_ID, "CUSA00265_00"
+        )
+    ) == {stored_game_release.id, "minecraft-ps5"}
+
+
+def test_find_game_release_ids_returns_empty_without_identifiers(db_connection):
+    repository = ExternalIdentifierRepository(db_connection)
+    assert (
+        repository.find_game_release_ids(
+            PlatformEnum.PLAYSTATION, IdentifierTypeEnum.TITLE_ID, "missing"
+        )
+        == []
+    )
 
 
 def test_get_all_for_release_returns_empty_list(

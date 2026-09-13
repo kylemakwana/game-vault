@@ -2,7 +2,7 @@
 
 from pydantic import BaseModel
 
-from game_vault.config import PlatformEnum
+from game_vault.config import IdentifierTypeEnum, PlatformEnum
 
 
 class Platform(BaseModel):
@@ -27,7 +27,7 @@ class ExternalIdentifier(BaseModel):
     """Identify a release within an external service."""
 
     service: PlatformEnum
-    identifier_type: str
+    identifier_type: IdentifierTypeEnum
     value: str
 
 

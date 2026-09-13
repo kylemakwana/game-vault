@@ -29,8 +29,21 @@ class PlayStationTitleCategoryEnum(StrEnum):
     UNKNOWN = "unknown"
 
 
-class IdentifierTypeEnum(StrEnum):
-    """Identifier enum."""
+class PlayStationSourceTypeEnum(StrEnum):
+    """PlayStation soruce type enum."""
 
     PLAYED_TITLE = "Played Title"
     TROPHY_TITLE = "Trophy Title"
+
+
+class IdentifierTypeEnum(StrEnum):
+    TITLE_ID = "TITLE_ID"
+    NP_COMMUNICATION_ID = "NP_COMMUNICATION_ID"
+    NP_TITLE_ID = "NP_TITLE_ID"
+
+
+class SourceTypeMappingEnum(StrEnum):
+    """Source type mapping."""
+
+    PLAYSTATION_TITLE = "playstation_title"
+    PLAYSTATION_TROPHY_SET = "playstation_trophy_set"

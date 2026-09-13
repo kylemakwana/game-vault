@@ -9,11 +9,35 @@ class ExternalIdentifierRepository:
     """Provide persistence operations for external release identifiers."""
 
     def __init__(self, connection: sqlite3.Connection) -> None:
-        """Initialize the repository.
+        """Initialise the repository.
 
         :param connection: Open SQLite connection containing the Game Vault schema.
         """
         self.connection = connection
+
+    def find_game_release_ids(
+        self,
+        service: str,
+        identifier_type: str,
+        value: str,
+    ) -> list[str]:
+        """Find game releases associated with an external identifier."""
+        cursor = self.connection.execute(
+            """
+            SELECT DISTINCT game_release_id
+            FROM external_identifier
+            WHERE service = ?
+              AND identifier_type = ?
+              AND value = ?
+            """,
+            (
+                service,
+                identifier_type,
+                value,
+            ),
+        )
+
+        return [row[0] for row in cursor.fetchall()]
 
     def get_all_for_release(
         self,

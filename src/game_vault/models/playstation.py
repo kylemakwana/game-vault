@@ -4,7 +4,10 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
-from game_vault.config import PlayStationPlatformEnum
+from game_vault.config import (
+    PlayStationPlatformEnum,
+    PlayStationSourceTypeEnum,
+)
 
 
 class TrophyCounts(BaseModel):
@@ -192,7 +195,7 @@ class PlayStationSnapshot(BaseModel):
 
 
 class PlayStationSourceKey(BaseModel):
-    source_type: str
+    source_type: PlayStationSourceTypeEnum
     source_id: str
 
 

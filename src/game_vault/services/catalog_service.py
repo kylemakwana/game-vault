@@ -18,7 +18,7 @@ class CatalogService:
         game_release_repository: GameReleaseRepository,
         source_game_mapping_repository: SourceGameMappingRepository,
     ) -> None:
-        """Initialize the catalogue service.
+        """Initialise the catalogue service.
 
         :param game_repository: Repository used to persist games.
         :param game_release_repository: Repository used to persist releases.

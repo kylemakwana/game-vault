@@ -47,7 +47,7 @@ class PlayStationSnapshotBuilder:
     """Transform cached PlayStation API responses into domain models."""
 
     def __init__(self, raw_dir: Path = Path("data/playstation/raw")):
-        """Initialize the snapshot builder.
+        """Initialise the snapshot builder.
 
         :param raw_dir: Directory containing cached PlayStation JSON responses.
         """

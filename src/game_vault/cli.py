@@ -2,6 +2,7 @@
 
 import argparse
 import json
+from collections import Counter
 from pathlib import Path
 
 from game_vault.databases.achievement_group_repository import AchievementGroupRepository
@@ -26,7 +27,9 @@ from game_vault.mappers.playstation_mapper import PlayStationMappedData
 from game_vault.models.game import Game, GameRelease
 from game_vault.models.mapping import SourceGameMapping
 from game_vault.models.playstation import PlayStationSnapshot
+from game_vault.models.resolution import ResolutionStatusEnum
 from game_vault.models.series import GameSeries, GameSeriesMembership
+from game_vault.services.game_resolution_service import GameResolutionService
 from game_vault.services.playstation_discovery_service import (
     PlayStationDiscoveryService,
 )
@@ -234,15 +237,77 @@ def discover_playstation_snapshot(
         builder = PlayStationSnapshotBuilder()
         snapshot = builder.build()
 
-    ps_discovery_service = PlayStationDiscoveryService()
-    candidates = ps_discovery_service.discover(snapshot)
+    with get_connection() as connection:
+        source_game_mapping_repository = SourceGameMappingRepository(connection)
+        external_identifier_repository = ExternalIdentifierRepository(connection)
 
-    with open(Path("data/playstation/candidate_ps_titles.json"), "w") as f:
+        ps_discovery_service = PlayStationDiscoveryService()
+        resolution_service = GameResolutionService(
+            source_game_mapping_repository=source_game_mapping_repository,
+            external_identifier_repository=external_identifier_repository,
+        )
+
+        candidates = ps_discovery_service.discover(snapshot)
+
+        results = [resolution_service.resolve(candidate) for candidate in candidates]
+
+    output_dir = Path("data/playstation")
+    output_dir.mkdir(parents=True, exist_ok=True)
+    with (output_dir / "candidate_ps_titles.json").open("w", encoding="utf-8") as f:
         json.dump(
             [candidate.model_dump(mode="json") for candidate in candidates],
             f,
             indent=4,
         )
+
+    status_counts = Counter(result.status for result in results)
+
+    method_counts = Counter(
+        result.match_method for result in results if result.match_method is not None
+    )
+
+    output = []
+
+    for candidate, result in zip(
+        candidates,
+        results,
+        strict=True,
+    ):
+        if result.status == ResolutionStatusEnum.MATCHED:
+            print(
+                f"{candidate.names} -> {result.game_release_id} ({result.match_method})"
+            )
+
+        if result.status == ResolutionStatusEnum.UNMATCHED:
+            print(f"UNMATCHED: {candidate.names} {candidate.platforms}")
+
+        output.append(
+            {
+                "names": candidate.names,
+                "platforms": candidate.platforms,
+                "title_ids": candidate.title_ids,
+                "np_communication_ids": candidate.np_communication_ids,
+                "np_title_ids": candidate.np_title_ids,
+                "resolution": result.model_dump(mode="json"),
+            }
+        )
+
+    (output_dir / "resolution_results.json").write_text(
+        json.dumps(output, indent=4, default=str), encoding="utf-8"
+    )
+
+    print(f"Candidates: {len(candidates)}")
+    print()
+
+    print("Resolution status:")
+    for status, count in status_counts.items():
+        print(f"  {status.value}: {count}")
+
+    print()
+
+    print("Match methods:")
+    for method, count in method_counts.items():
+        print(f"  {method.value}: {count}")
 
 
 def import_playstation() -> None:

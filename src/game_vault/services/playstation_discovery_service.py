@@ -1,8 +1,8 @@
 """Discover candidate game releases from PlayStation snapshot data."""
 
 from game_vault.config import (
-    IdentifierTypeEnum,
     PlayStationPlatformEnum,
+    PlayStationSourceTypeEnum,
     PlayStationTitleCategoryEnum,
 )
 from game_vault.models.playstation import (
@@ -90,7 +90,7 @@ class PlayStationDiscoveryService:
         return PlayStationTitleCandidate(
             source_key=[
                 PlayStationSourceKey(
-                    source_type=IdentifierTypeEnum.PLAYED_TITLE.value,
+                    source_type=PlayStationSourceTypeEnum.PLAYED_TITLE.value,
                     source_id=played_title.title_id,
                 )
             ],
@@ -124,7 +124,7 @@ class PlayStationDiscoveryService:
         return PlayStationTitleCandidate(
             source_key=[
                 PlayStationSourceKey(
-                    source_type=IdentifierTypeEnum.TROPHY_TITLE.value,
+                    source_type=PlayStationSourceTypeEnum.TROPHY_TITLE.value,
                     source_id=trophy_title.np_communication_id,
                 )
             ],
@@ -175,7 +175,7 @@ class PlayStationDiscoveryService:
         # Remember that this trophy record contributed to the candidate.
         candidate.source_key.append(
             PlayStationSourceKey(
-                source_type=IdentifierTypeEnum.TROPHY_TITLE.value,
+                source_type=PlayStationSourceTypeEnum.TROPHY_TITLE.value,
                 source_id=trophy_title.np_communication_id,
             )
         )

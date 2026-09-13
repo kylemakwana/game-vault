@@ -1,9 +1,14 @@
 import pytest
 
-from game_vault.config import IdentifierTypeEnum, PlayStationPlatformEnum
+from game_vault.config import PlayStationPlatformEnum, PlayStationSourceTypeEnum
 from game_vault.services.playstation_discovery_service import (
     PlayStationDiscoveryService,
 )
+
+
+@pytest.mark.parametrize("platform", ["psvita", "PSVITA", "pspc", "PSPC"])
+def test_maps_vita_and_pc_platform_strings(platform):
+    assert PlayStationDiscoveryService._map_platform(platform).value == platform.upper()
 
 
 @pytest.fixture
@@ -44,8 +49,8 @@ def test_matching_titles_merge_evidence_without_changing_snapshot(
     assert candidate.np_communication_ids == ["TEST12345_00"]
     assert candidate.np_title_ids == ([] if np_title_id is None else [np_title_id])
     assert [(key.source_type, key.source_id) for key in candidate.source_key] == [
-        (IdentifierTypeEnum.PLAYED_TITLE, "TEST12345_00"),
-        (IdentifierTypeEnum.TROPHY_TITLE, "TEST12345_00"),
+        (PlayStationSourceTypeEnum.PLAYED_TITLE, "TEST12345_00"),
+        (PlayStationSourceTypeEnum.TROPHY_TITLE, "TEST12345_00"),
     ]
     assert candidate.played_title == snapshot.played_titles[0]
     assert candidate.trophy_title == snapshot.trophy_titles[0]
@@ -88,7 +93,7 @@ def test_trophy_only_deduplicates_platforms(snapshot, np_title_id):
     assert candidate.title_ids == []
     assert candidate.np_title_ids == ([] if np_title_id is None else [np_title_id])
     assert candidate.np_communication_ids == ["TEST12345_00"]
-    assert candidate.source_key[0].source_type == IdentifierTypeEnum.TROPHY_TITLE
+    assert candidate.source_key[0].source_type == PlayStationSourceTypeEnum.TROPHY_TITLE
 
 
 def test_second_trophy_set_does_not_overwrite_first_match(snapshot):
