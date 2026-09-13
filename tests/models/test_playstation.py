@@ -21,32 +21,34 @@ def test_trophy_counts_total_sums_all_trophy_types():
 
 def test_trophy_title_rejects_none_for_boolean_fields():
     with pytest.raises(ValidationError):
-        PlaystationTrophyTitle(
-            np_communication_id="TEST12345_00",
-            np_service_name="trophy2",
-            np_title_id=None,
-            trophy_set_version="01.00",
-            title_name="Test Game",
-            title_detail=None,
-            title_icon_url=None,
-            platforms=["PS5"],
-            has_trophy_groups=None,
-            hidden=None,
-            progress=0,
-            earned_trophies={
-                "bronze": 0,
-                "silver": 0,
-                "gold": 0,
-                "platinum": 0,
-            },
-            defined_trophies={
-                "bronze": 1,
-                "silver": 0,
-                "gold": 0,
-                "platinum": 0,
-            },
-            last_updated_at=None,
-            groups=[],
+        PlaystationTrophyTitle.model_validate(
+            {
+                "np_communication_id": "TEST12345_00",
+                "np_service_name": "trophy2",
+                "np_title_id": None,
+                "trophy_set_version": "01.00",
+                "title_name": "Test Game",
+                "title_detail": None,
+                "title_icon_url": None,
+                "platforms": ["PS5"],
+                "has_trophy_groups": None,
+                "hidden": None,
+                "progress": 0,
+                "earned_trophies": {
+                    "bronze": 0,
+                    "silver": 0,
+                    "gold": 0,
+                    "platinum": 0,
+                },
+                "defined_trophies": {
+                    "bronze": 1,
+                    "silver": 0,
+                    "gold": 0,
+                    "platinum": 0,
+                },
+                "last_updated_at": None,
+                "groups": [],
+            }
         )
 
 

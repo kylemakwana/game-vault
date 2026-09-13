@@ -174,11 +174,10 @@ class PlayStationSnapshotBuilder:
         :return: Normalized PlayStation devices.
         """
         grouped_devices: dict[str, list[dict]] = defaultdict(list)
+        built_devices: list[PlayStationDevice] = []
 
         for device in devices:
             grouped_devices[device["deviceId"]].append(device)
-
-        devices = []
 
         for device_id, records in grouped_devices.items():
             first = records[0]
@@ -193,7 +192,7 @@ class PlayStationSnapshotBuilder:
                 for record in records
             ]
 
-            devices.append(
+            built_devices.append(
                 PlayStationDevice(
                     device_id=device_id,
                     device_name=first.get("deviceName"),
@@ -203,7 +202,7 @@ class PlayStationSnapshotBuilder:
                 )
             )
 
-        return devices
+        return built_devices
 
     @staticmethod
     def _classify_title(title) -> tuple[str, str]:

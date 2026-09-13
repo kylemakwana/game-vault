@@ -36,7 +36,7 @@ class PlatformAccount(BaseModel):
 
     service_id: PlatformEnum
 
-    username: str | None = None
-    external_account_id: str | None = None
+    username: str
+    external_account_id: str
 
     avatar_url: str | None = None

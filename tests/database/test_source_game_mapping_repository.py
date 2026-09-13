@@ -1,4 +1,5 @@
 import sqlite3
+from collections.abc import Iterator
 
 import pytest
 
@@ -10,7 +11,7 @@ from game_vault.models.mapping import SourceGameMapping
 
 
 @pytest.fixture
-def connection() -> sqlite3.Connection:
+def connection() -> Iterator[sqlite3.Connection]:
     connection = sqlite3.connect(":memory:")
     connection.row_factory = sqlite3.Row
     connection.execute("PRAGMA foreign_keys = ON")

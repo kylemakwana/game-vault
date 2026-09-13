@@ -117,7 +117,7 @@ class PlatformAccountRepository:
 
         return [PlatformAccount.model_validate(dict(row)) for row in rows]
 
-    def upsert(self, platform_account: PlatformAccount | None) -> None:
+    def upsert(self, platform_account: PlatformAccount) -> None:
         """
         Add or update a platform account to the database.
 

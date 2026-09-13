@@ -53,7 +53,7 @@ def test_collect_playstation_data_builds_collector_and_collects(monkeypatch):
     client = Mock()
     create_psn_client = Mock(return_value=client)
     client_module = ModuleType("game_vault.playstation_client")
-    client_module.create_psn_client = create_psn_client
+    setattr(client_module, "create_psn_client", create_psn_client)
     monkeypatch.setitem(
         sys.modules,
         "game_vault.playstation_client",

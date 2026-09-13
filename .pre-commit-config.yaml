@@ -13,3 +13,9 @@ repos:
         entry: uv run pytest
         language: system
         pass_filenames: false
+
+      - id: pyrefly
+        name: Pyrefly
+        entry: uv run pyrefly check
+        language: system
+        pass_filenames: false
