@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass, field
 
-from game_vault.config import PlatformEnum, PlayStationConsoleEnum
+from game_vault.config import PlatformEnum, PlayStationPlatformEnum
 from game_vault.models.achievement import (
     Achievement,
     AchievementGroup,
@@ -205,7 +205,7 @@ class PlayStationMapper:
         return activities
 
     @staticmethod
-    def _platform_from_category(category: str) -> PlayStationConsoleEnum:
+    def _platform_from_category(category: str) -> PlayStationPlatformEnum:
         """Convert a PlayStation category into a platform identifier.
 
         :param category: PlayStation title category.
@@ -213,11 +213,11 @@ class PlayStationMapper:
         """
         match category:
             case "ps5_native_game":
-                return PlayStationConsoleEnum.PS5
+                return PlayStationPlatformEnum.PS5
             case "ps4_game":
-                return PlayStationConsoleEnum.PS4
+                return PlayStationPlatformEnum.PS4
             case _:
-                return PlayStationConsoleEnum.UNKNOWN
+                return PlayStationPlatformEnum.UNKNOWN
 
     def _map_trophy_title(
         self,

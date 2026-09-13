@@ -2,7 +2,7 @@
 
 from game_vault.config import (
     IdentifierTypeEnum,
-    PlayStationConsoleEnum,
+    PlayStationPlatformEnum,
     PlayStationTitleCategoryEnum,
 )
 from game_vault.models.playstation import (
@@ -25,6 +25,7 @@ class PlayStationDiscoveryService:
         candidates = [
             self._candidate_from_played_title(played_title)
             for played_title in snapshot.played_titles
+            if played_title.content_type == "game"
         ]
 
         for trophy_title in snapshot.trophy_titles:
@@ -112,7 +113,7 @@ class PlayStationDiscoveryService:
         :param trophy_title: A ``PlaystationTrophyTitle`` record.
         :return: A ``PlayStationTitleCandidate`` record.
         """
-        platforms: list[PlayStationConsoleEnum] = []
+        platforms: list[PlayStationPlatformEnum] = []
 
         for raw_platform in trophy_title.platforms:
             platform = self._map_platform(raw_platform)
@@ -189,38 +190,40 @@ class PlayStationDiscoveryService:
     @staticmethod
     def _platform_from_category(
         category: str,
-    ) -> PlayStationConsoleEnum:
+    ) -> PlayStationPlatformEnum:
         """Map a played-title category to a PlayStation console."""
         match category:
             case PlayStationTitleCategoryEnum.PS5_NATIVE_GAME:
-                return PlayStationConsoleEnum.PS5
+                return PlayStationPlatformEnum.PS5
 
             case PlayStationTitleCategoryEnum.PS4_GAME:
-                return PlayStationConsoleEnum.PS4
+                return PlayStationPlatformEnum.PS4
 
             case _:
-                return PlayStationConsoleEnum.UNKNOWN
+                return PlayStationPlatformEnum.UNKNOWN
 
     @staticmethod
     def _map_platform(
-        platform: str | PlayStationConsoleEnum,
-    ) -> PlayStationConsoleEnum:
+        platform: str | PlayStationPlatformEnum,
+    ) -> PlayStationPlatformEnum:
         """Map a trophy platform to a PlayStation console enum."""
-        if isinstance(platform, PlayStationConsoleEnum):
+        if isinstance(platform, PlayStationPlatformEnum):
             return platform
 
         match platform.upper():
+            case "PSPC":
+                return PlayStationPlatformEnum.PSPC
             case "PS5":
-                return PlayStationConsoleEnum.PS5
+                return PlayStationPlatformEnum.PS5
 
             case "PS4":
-                return PlayStationConsoleEnum.PS4
+                return PlayStationPlatformEnum.PS4
 
             case "PS3":
-                return PlayStationConsoleEnum.PS3
+                return PlayStationPlatformEnum.PS3
 
             case _:
-                return PlayStationConsoleEnum.UNKNOWN
+                return PlayStationPlatformEnum.UNKNOWN
 
     def _platforms_overlap(
         self,

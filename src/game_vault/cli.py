@@ -1,6 +1,7 @@
 """Provide the Game Vault command-line interface."""
 
 import argparse
+import json
 from pathlib import Path
 
 from game_vault.databases.achievement_group_repository import AchievementGroupRepository
@@ -26,7 +27,11 @@ from game_vault.models.game import Game, GameRelease
 from game_vault.models.mapping import SourceGameMapping
 from game_vault.models.playstation import PlayStationSnapshot
 from game_vault.models.series import GameSeries, GameSeriesMembership
+from game_vault.services.playstation_discovery_service import (
+    PlayStationDiscoveryService,
+)
 from game_vault.services.playstation_import_service import PlaystationImportService
+from game_vault.services.playstation_snapshot_builder import PlayStationSnapshotBuilder
 
 
 def main() -> None:
@@ -77,6 +82,11 @@ def main() -> None:
     )
 
     psn_subparsers.add_parser(
+        "discover",
+        help="Discover PlayStation game releases from your snapshot data.",
+    )
+
+    psn_subparsers.add_parser(
         "import",
         help="Import the PlayStation data",
     )
@@ -108,6 +118,9 @@ def handle_psn_command(command: str) -> None:
     elif command == "map":
         map_playstation_snapshot()
 
+    elif command == "discover":
+        discover_playstation_snapshot()
+
     elif command == "import":
         import_playstation()
 
@@ -126,7 +139,7 @@ def collect_playstation_data() -> None:
 
 
 def build_playstation_snapshot(write_output: bool = True) -> PlayStationSnapshot:
-    """Build and write a normalized PlayStation snapshot from cached data."""
+    """Build and write a normalised PlayStation snapshot from cached data."""
     from pathlib import Path
 
     from game_vault.services.playstation_snapshot_builder import (
@@ -212,6 +225,24 @@ def map_playstation_snapshot(
     )
 
     return mapper.map()
+
+
+def discover_playstation_snapshot(
+    snapshot: PlayStationSnapshot | None = None,
+):
+    if not snapshot:
+        builder = PlayStationSnapshotBuilder()
+        snapshot = builder.build()
+
+    ps_discovery_service = PlayStationDiscoveryService()
+    candidates = ps_discovery_service.discover(snapshot)
+
+    with open("candidate_ps_titles.json", "w") as f:
+        json.dump(
+            [candidate.model_dump(mode="json") for candidate in candidates],
+            f,
+            indent=4,
+        )
 
 
 def import_playstation() -> None:

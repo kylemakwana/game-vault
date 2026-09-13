@@ -2,7 +2,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from game_vault.config import PlatformEnum, PlayStationConsoleEnum
+from game_vault.config import PlatformEnum, PlayStationPlatformEnum
 
 
 def test_find_release_mapping_returns_matching_mapping(
@@ -151,10 +151,10 @@ def test_map_played_titles_ignores_mapping_without_release(
 @pytest.mark.parametrize(
     ("category", "expected"),
     [
-        ("ps5_native_game", PlayStationConsoleEnum.PS5),
-        ("ps4_game", PlayStationConsoleEnum.PS4),
-        ("unknown", PlayStationConsoleEnum.UNKNOWN),
-        ("ps3_game", PlayStationConsoleEnum.UNKNOWN),
+        ("ps5_native_game", PlayStationPlatformEnum.PS5),
+        ("ps4_game", PlayStationPlatformEnum.PS4),
+        ("unknown", PlayStationPlatformEnum.UNKNOWN),
+        ("ps3_game", PlayStationPlatformEnum.UNKNOWN),
     ],
 )
 def test_platform_from_category(category, expected):

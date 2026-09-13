@@ -10,12 +10,13 @@ class PlatformEnum(StrEnum):
     STEAM = "Steam"
 
 
-class PlayStationConsoleEnum(StrEnum):
+class PlayStationPlatformEnum(StrEnum):
     """PlayStation Console enum."""
 
     PS5 = "PS5"
     PS4 = "PS4"
     PS3 = "PS3"
+    PSPC = "PSPC"
     UNKNOWN = "Unknown PlayStation console"
 
 

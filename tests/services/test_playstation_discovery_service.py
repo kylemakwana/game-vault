@@ -1,6 +1,6 @@
 import pytest
 
-from game_vault.config import IdentifierTypeEnum, PlayStationConsoleEnum
+from game_vault.config import IdentifierTypeEnum, PlayStationPlatformEnum
 from game_vault.services.playstation_discovery_service import (
     PlayStationDiscoveryService,
 )
@@ -37,8 +37,8 @@ def test_matching_titles_merge_evidence_without_changing_snapshot(
         ["Test Game"] if name == "Test Game" else ["Test Game", name]
     )
     assert candidate.platforms == [
-        PlayStationConsoleEnum.PS5,
-        PlayStationConsoleEnum.PS4,
+        PlayStationPlatformEnum.PS5,
+        PlayStationPlatformEnum.PS4,
     ]
     assert candidate.product_ids == ["TEST12345_00"]
     assert candidate.np_communication_ids == ["TEST12345_00"]
@@ -80,10 +80,10 @@ def test_trophy_only_deduplicates_platforms(snapshot, np_title_id):
     snapshot.trophy_titles[0].np_title_id = np_title_id
     (candidate,) = PlayStationDiscoveryService().discover(snapshot)
     assert candidate.platforms == [
-        PlayStationConsoleEnum.PS3,
-        PlayStationConsoleEnum.PS4,
-        PlayStationConsoleEnum.PS5,
-        PlayStationConsoleEnum.UNKNOWN,
+        PlayStationPlatformEnum.PS3,
+        PlayStationPlatformEnum.PS4,
+        PlayStationPlatformEnum.PS5,
+        PlayStationPlatformEnum.UNKNOWN,
     ]
     assert candidate.product_ids == []
     assert candidate.np_title_ids == ([] if np_title_id is None else [np_title_id])
@@ -120,6 +120,6 @@ def test_duplicate_played_names_match_each_trophy_only_once(snapshot):
     assert second.np_communication_ids == ["SECOND_SET"]
 
 
-@pytest.mark.parametrize("platform", list(PlayStationConsoleEnum))
+@pytest.mark.parametrize("platform", list(PlayStationPlatformEnum))
 def test_platform_enum_is_preserved(platform):
     assert PlayStationDiscoveryService._map_platform(platform) is platform
