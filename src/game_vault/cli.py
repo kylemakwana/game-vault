@@ -237,7 +237,7 @@ def discover_playstation_snapshot(
     ps_discovery_service = PlayStationDiscoveryService()
     candidates = ps_discovery_service.discover(snapshot)
 
-    with open("candidate_ps_titles.json", "w") as f:
+    with open(Path("data/playstation/candidate_ps_titles.json"), "w") as f:
         json.dump(
             [candidate.model_dump(mode="json") for candidate in candidates],
             f,
